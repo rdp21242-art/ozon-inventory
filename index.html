@@ -81,25 +81,42 @@ async function startCamera(){scanPaused=!!current;if(!navigator.mediaDevices?.ge
 async function setCameraZoom(value){const z=Math.max(1,Math.min(4,Number(value)||1));digitalZoom=z;$('zoomValue').textContent=z.toFixed(1)+'×';if(nativeZoom){const applied=Math.max(nativeZoomMin,Math.min(nativeZoomMax,nativeZoomMin+(z-1)*(nativeZoomMax-nativeZoomMin)/3));try{await nativeZoom.applyConstraints({advanced:[{zoom:applied}]});$('video').style.setProperty('--camera-zoom','1');$('zoomInfo').textContent='Используется аппаратный зум камеры.';return;}catch(e){nativeZoom=null;}}$('video').style.setProperty('--camera-zoom',String(z));$('zoomInfo').textContent='Используется цифровой зум. Для чёткости поднеси телефон так, чтобы цифры были резкими.';}
 function stopCamera(){clearTimeout(scanTimer);scanTimer=null;scanPaused=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}$('video').srcObject=null;$('video').classList.add('hidden');$('placeholder').classList.remove('hidden');$('frame').classList.add('hidden');$('cameraBtn').textContent='Включить камеру';$('zoomRange').disabled=true;$('zoomInfo').textContent='Увеличение станет доступно после включения камеры.';nativeZoom=null;$('ocrInfo').textContent='Камера выключена.';}
 function scheduleScan(delay=850){clearTimeout(scanTimer);scanTimer=null;if(stream&&!current&&!scanPaused)scanTimer=setTimeout(()=>{scanTimer=null;recognize(true);},delay);}
-function normalizeOcr(s){return String(s||'').toUpperCase().replace(/[ОOQ]/g,'0').replace(/[З]/g,'3').replace(/[IL|]/g,'1').replace(/[Б]/g,'6').replace(/[Ｓ]/g,'5').replace(/[^A-ZА-ЯЁ0-9-]/g,'');}
-function tokenOcr(s){return String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[^а-я]+/gi,' ').trim().split(/\s+/).filter(x=>x.length>=2);}
-function wordHit(a,b){if(!a||!b)return false;if(a===b)return true;if(a.length>=4&&b.length>=4){let d=0;for(let i=0,j=0;i<a.length&&j<b.length;){if(a[i]===b[j]){i++;j++;}else{d++;if(d>1)return false;if(a.length>=b.length)i++;else j++;}}return d+(a.length-i)+(b.length-j)<=1;}return false;}
+function normalizeOcr(s){return String(s||'').toUpperCase()
+ .replace(/[ОOQОо]/g,'0')
+ .replace(/[ЗЗз]/g,'3')
+ .replace(/[IL|Ііl]/g,'1')
+ .replace(/[ББбG]/g,'6')
+ .replace(/[ＳSs]/g,'5')
+ .replace(/[ВВв]/g,'8')
+ .replace(/[ААа]/g,'A')
+ .replace(/[^A-ZА-ЯЁ0-9-]/g,'');}
+function tokenOcr(s){return String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[^а-яa-z0-9]+/gi,' ').trim().split(/\s+/).filter(x=>x.length>=2);}
+function wordHit(a,b){if(!a||!b)return false;a=a.toLowerCase();b=b.toLowerCase();if(a===b)return true;if(a.length>=3&&b.length>=3){if(a.includes(b)||b.includes(a))return true;}if(a.length>=4&&b.length>=4){let d=0;for(let i=0,j=0;i<a.length&&j<b.length;){if(a[i]===b[j]){i++;j++;}else{d++;if(d>1)return false;if(a.length>=b.length)i++;else j++;}}return d+(a.length-i)+(b.length-j)<=1;}return false;}
 function articleSuffixes(text){
- const raw=String(text||'').toUpperCase().replace(/[ОOQ]/g,'0').replace(/[З]/g,'3').replace(/[IL|]/g,'1').replace(/[Б]/g,'6');
+ const raw=String(text||'').toUpperCase()
+  .replace(/[ОOQОо]/g,'0')
+  .replace(/[ЗЗз]/g,'3')
+  .replace(/[IL|Ііl]/g,'1')
+  .replace(/[ББбG]/g,'6')
+  .replace(/[ＳSs]/g,'5')
+  .replace(/[ВВв]/g,'8');
  const out=new Set();
- // Ищем только изменяемую часть артикула после постоянного префикса 21242.
- for(const m of raw.matchAll(/21242[\s-]*([0-9]{1,5})(?:[\s-]+([0-9]{1,5}))?/g)){
-  const suffix=(m[1]||'')+(m[2]||'');if(suffix.length>=1&&suffix.length<=10)out.add(suffix);
+ // Ищем изменяемую часть артикула после постоянного префикса 21242 (с возможными OCR-ошибками).
+ for(const m of raw.matchAll(/(?:21242|2[1I]242|21[2Z]42|212[4A]2)[\s\-]*([0-9ОOЗЗIL|]{1,6})(?:[\s\-]+([0-9ОOЗЗIL|]{1,5}))?/g)){
+  let s1=(m[1]||'').replace(/[ОO]/g,'0').replace(/[ЗЗ]/g,'3').replace(/[IL|]/g,'1');
+  let s2=(m[2]||'').replace(/[ОO]/g,'0').replace(/[ЗЗ]/g,'3').replace(/[IL|]/g,'1');
+  const suffix=s1+s2;if(suffix.length>=1&&suffix.length<=10&&/^\d+$/.test(suffix))out.add(suffix);
  }
+ // Также ищем просто длинные числовые последовательности рядом с 21242
+ for(const m of raw.matchAll(/21242[\s\-]*([0-9]{2,8})/g)){if(m[1])out.add(m[1]);}
  return [...out];
 }
-function productArticleSuffix(offerId){const m=String(offerId||'').match(/^21242[\s-]*([0-9]+)(?:[\s-]+([0-9]+))?/i);return m?(m[1]||'')+(m[2]||''):'';}
+function productArticleSuffix(offerId){const m=String(offerId||'').match(/^21242[\s\-]*([0-9]+)(?:[\s\-]+([0-9]+))?/i);return m?(m[1]||'')+(m[2]||''):'';}
 function analyzeLabel(text){
  const raw=String(text||'');const suffixes=articleSuffixes(raw);
- // Название начинается первым словом этикетки; цвет — последнее текстовое слово.
  const labelWords=tokenOcr(raw).filter(w=>!/^\d+$/.test(w));
  const firstWord=labelWords[0]||'';const lastWord=labelWords[labelWords.length-1]||'';
- const stop=new Set(['для','или','шт','комплект','набор','товар','новый','новая','новое','пластик']);
+ const stop=new Set(['для','или','шт','комплект','набор','товар','новый','новая','новое','пластик','артикул','код','ozon','озон']);
  const ranked=products.map(p=>{
   const idSuffix=productArticleSuffix(p.offer_id);const articleExact=!!idSuffix&&suffixes.includes(idSuffix);
   const nameWords=tokenOcr(p.name||'');const productFirst=nameWords[0]||'';const productColor=nameWords[nameWords.length-1]||'';
@@ -108,31 +125,154 @@ function analyzeLabel(text){
   const middle=nameWords.slice(1,-1).filter(w=>!stop.has(w));
   const labelMiddle=labelWords.slice(1,-1);
   const matched=[...new Set(middle.filter(n=>labelMiddle.some(w=>wordHit(n,w))))];
-  const score=(articleExact?100:0)+(firstMatch?35:0)+(colorMatch?35:0)+Math.min(matched.length,2)*12;
-  return {product:p,articleExact,wordMatches:matched.length,matched,colorMatch,firstMatch,score,productFirst,productColor};
- }).filter(x=>x.firstMatch||x.colorMatch||x.articleExact).sort((a,b)=>b.score-a.score);
- // Автоподтверждение требует всех четырёх условий: артикул после 21242,
- // первое слово, цвет в конце и хотя бы одно дополнительное слово названия.
- const strict=ranked.find(x=>x.articleExact&&x.firstMatch&&x.colorMatch&&x.wordMatches>=1);
- return {strict,ranked:ranked.slice(0,5),suffixes,labelWords,firstWord,lastWord};
+  // Дополнительный бонус за совпадение любого значимого слова названия
+  const anyNameHit=nameWords.filter(w=>!stop.has(w)&&w.length>=3).some(n=>labelWords.some(w=>wordHit(n,w)));
+  const score=(articleExact?120:0)+(firstMatch?30:0)+(colorMatch?30:0)+Math.min(matched.length,3)*15+(anyNameHit&&!firstMatch&&!colorMatch?20:0);
+  return {product:p,articleExact,wordMatches:matched.length,matched,colorMatch,firstMatch,score,productFirst,productColor,anyNameHit};
+ }).filter(x=>x.firstMatch||x.colorMatch||x.articleExact||x.anyNameHit).sort((a,b)=>b.score-a.score);
+ // Автоподтверждение: артикул + (первое слово ИЛИ цвет) + хотя бы одно доп. слово, или очень высокий score
+ const strict=ranked.find(x=>x.articleExact&&x.wordMatches>=1&&(x.firstMatch||x.colorMatch))
+  || ranked.find(x=>x.articleExact&&x.score>=150);
+ return {strict,ranked:ranked.slice(0,6),suffixes,labelWords,firstWord,lastWord};
 }
-async function ensureOcr(){if(ocrWorker)return;$('ocrInfo').textContent='Загружаю русскую модель распознавания…';ocrWorker=await Tesseract.createWorker('rus',1,{logger:m=>{if(m.status==='recognizing text')$('ocrInfo').textContent=`Читаю русскую этикетку… ${Math.round((m.progress||0)*100)}%`;}});await ocrWorker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1',user_defined_dpi:'250'});}
+async function ensureOcr(){
+ if(ocrWorker)return;
+ $('ocrInfo').textContent='Загружаю русскую модель распознавания…';
+ // rus + eng помогает с цифрами и смешанными этикетками
+ ocrWorker=await Tesseract.createWorker(['rus','eng'],1,{
+  logger:m=>{if(m.status==='recognizing text')$('ocrInfo').textContent=`Читаю этикетку… ${Math.round((m.progress||0)*100)}%`;}
+ });
+ await ocrWorker.setParameters({
+  tessedit_pageseg_mode:'6',
+  preserve_interword_spaces:'1',
+  user_defined_dpi:'300',
+  tessedit_char_blacklist:'|`~'
+ });
+}
 function makeFullLabelCanvas(video,mode='gray'){
- const c=$('canvas'),ctx=c.getContext('2d',{willReadFrequently:true}),vw=video.videoWidth,vh=video.videoHeight;const cam=$('video').parentElement.getBoundingClientRect();const scale=Math.max(cam.width/vw,cam.height/vh),z=nativeZoom?1:digitalZoom;const sw=Math.min(vw,cam.width/(scale*z)),sh=Math.min(vh,cam.height/(scale*z)),sx=(vw-sw)/2,sy=(vh-sh)/2;const targetW=Math.min(1600,Math.max(1100,Math.round(sw)));c.width=targetW;c.height=Math.round(targetW*sh/sw);
- ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(video,sx,sy,sw,sh,0,0,c.width,c.height);
- const im=ctx.getImageData(0,0,c.width,c.height),d=im.data;let min=255,max=0;
- for(let i=0;i<d.length;i+=4){const g=Math.round(.299*d[i]+.587*d[i+1]+.114*d[i+2]);if(g<min)min=g;if(g>max)max=g;d[i]=d[i+1]=d[i+2]=g;d[i+3]=255;}
- const span=Math.max(40,max-min);for(let i=0;i<d.length;i+=4){let g=(d[i]-min)*255/span;if(mode==='contrast')g=Math.max(0,Math.min(255,(g-115)*1.65+128));d[i]=d[i+1]=d[i+2]=g;}
- ctx.putImageData(im,0,0);return c;
+ const c=$('canvas'),ctx=c.getContext('2d',{willReadFrequently:true});
+ const vw=video.videoWidth,vh=video.videoHeight;
+ const cam=$('video').parentElement.getBoundingClientRect();
+ const scale=Math.max(cam.width/vw,cam.height/vh);
+ const z=nativeZoom?1:digitalZoom;
+ const sw=Math.min(vw,cam.width/(scale*z)),sh=Math.min(vh,cam.height/(scale*z));
+ const sx=(vw-sw)/2,sy=(vh-sh)/2;
+ // Более высокое разрешение для мелкого текста на этикетках
+ const targetW=Math.min(2000,Math.max(1200,Math.round(sw*1.15)));
+ c.width=targetW;c.height=Math.round(targetW*sh/sw);
+ ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+ ctx.drawImage(video,sx,sy,sw,sh,0,0,c.width,c.height);
+ let im=ctx.getImageData(0,0,c.width,c.height),d=im.data;
+ // Grayscale
+ let min=255,max=0;
+ for(let i=0;i<d.length;i+=4){
+  const g=Math.round(.299*d[i]+.587*d[i+1]+.114*d[i+2]);
+  if(g<min)min=g;if(g>max)max=g;
+  d[i]=d[i+1]=d[i+2]=g;d[i+3]=255;
+ }
+ // Contrast stretch
+ const span=Math.max(30,max-min);
+ for(let i=0;i<d.length;i+=4){
+  let g=(d[i]-min)*255/span;
+  if(mode==='contrast'||mode==='sharp')g=Math.max(0,Math.min(255,(g-110)*1.85+128));
+  if(mode==='binary'||mode==='inv'){
+   // простой порог после растяжения
+   g=g>135?255:0;
+  }
+  if(mode==='inv')g=255-g;
+  d[i]=d[i+1]=d[i+2]=g;
+ }
+ ctx.putImageData(im,0,0);
+ // Лёгкое повышение резкости для sharp/contrast
+ if(mode==='sharp'||mode==='contrast'){
+  const src=ctx.getImageData(0,0,c.width,c.height);
+  const dst=ctx.createImageData(c.width,c.height);
+  const s=src.data,dd=dst.data,w=c.width,h=c.height;
+  // 3x3 unsharp-ish kernel
+  const k=[0,-1,0,-1,5,-1,0,-1,0];
+  for(let y=1;y<h-1;y++){
+   for(let x=1;x<w-1;x++){
+    let sum=0,idx=0;
+    for(let ky=-1;ky<=1;ky++)for(let kx=-1;kx<=1;kx++){
+     sum+=s[((y+ky)*w+(x+kx))*4]*k[idx++];
+    }
+    const v=Math.max(0,Math.min(255,sum));
+    const p=(y*w+x)*4;dd[p]=dd[p+1]=dd[p+2]=v;dd[p+3]=255;
+   }
+  }
+  // края копируем
+  for(let x=0;x<w;x++){for(const y of [0,h-1]){const p=(y*w+x)*4;dd[p]=s[p];dd[p+1]=s[p+1];dd[p+2]=s[p+2];dd[p+3]=255;}}
+  for(let y=0;y<h;y++){for(const x of [0,w-1]){const p=(y*w+x)*4;dd[p]=s[p];dd[p+1]=s[p+1];dd[p+2]=s[p+2];dd[p+3]=255;}}
+  ctx.putImageData(dst,0,0);
+ }
+ return c;
 }
-function showOcrCandidates(items){const box=$('ocrDebug');if(!items.length)return;const rows=items.map(x=>`<div class="item" data-ocr-id="${esc(x.product.offer_id)}"><div><b>${esc(x.product.offer_id)}</b><small>${esc(x.product.name)} · слов совпало: ${x.wordMatches}${x.colorMatch?' · цвет совпал':''}${x.articleExact?' · артикул найден':''}</small></div><span class="tag">Проверить</span></div>`).join('');box.innerHTML=`<div style="font-weight:700;margin-bottom:5px">Возможные совпадения — нажми нужный товар:</div>${rows}`;box.querySelectorAll('[data-ocr-id]').forEach(el=>el.addEventListener('click',()=>lookup(el.dataset.ocrId)));}
-async function recognize(auto=false){if(!stream||current||scanPaused)return;if(busy){if(auto)scheduleScan(700);return;}const v=$('video');if(v.readyState<2){if(auto)scheduleScan(800);return;}busy=true;try{await ensureOcr();let best=null,bestText='';const outputs=[];
- // Основной быстрый проход. Второй, более чувствительный, запускаем только если первый не дал строгого совпадения.
- for(const [mode,psm] of [['gray',6],['contrast',11]]){await ocrWorker.setParameters({tessedit_pageseg_mode:String(psm),preserve_interword_spaces:'1',user_defined_dpi:'250'});const out=await ocrWorker.recognize(makeFullLabelCanvas(v,mode));const raw=String(out.data.text||'').trim();if(raw)outputs.push(raw);const a=analyzeLabel(raw);if(!best||((a.strict?10000:0)+(a.ranked[0]?.score||0))>((best.strict?10000:0)+(best.ranked[0]?.score||0))){best=a;bestText=raw;}if(a.strict)break;}
- if(best?.strict){const x=best.strict;$('ocrDebug').textContent=`Артикул: ${x.product.offer_id}\nНазвание: ${x.product.name}\nПервое слово: ${best.firstWord} ✓\nДополнительные слова: ${x.matched.join(', ')} ✓\nЦвет в конце: ${best.lastWord} ✓\nОкончание артикула после 21242: ${articleSuffixes(bestText).join(', ')} ✓`;$('ocrInfo').textContent='Совпали артикул, начало названия, дополнительные слова и цвет. Проверь товар и нажми +1.';lookup(x.product.offer_id);}
- else if(best?.ranked?.length){$('ocrInfo').textContent='Есть похожие товары. Для автоматического выбора должны совпасть артикул после 21242, первое слово, цвет и хотя бы одно дополнительное слово.';showOcrCandidates(best.ranked);}
- else{$('ocrDebug').textContent=outputs.length?('Текст всей этикетки:\n'+outputs[0].slice(0,900)):'Камера пока не прочитала текст. Поднеси этикетку ближе, чтобы она занимала большую часть кадра.';$('ocrInfo').textContent='Не удалось прочитать достаточно данных. Покажи этикетку целиком и поднеси её ближе.';}
- }catch(e){$('ocrInfo').textContent='Ошибка распознавания: '+e.message;}finally{await ocrWorker?.setParameters({tessedit_pageseg_mode:'6'}).catch(()=>{});busy=false;if(stream&&!current&&!scanPaused)scheduleScan(1300);}}
+function showOcrCandidates(items){
+ const box=$('ocrDebug');
+ if(!items.length)return;
+ const rows=items.map(x=>`<div class="item" data-ocr-id="${esc(x.product.offer_id)}"><div><b>${esc(x.product.offer_id)}</b><small>${esc(x.product.name)} · слов: ${x.wordMatches}${x.colorMatch?' · цвет':''}${x.articleExact?' · артикул':''}${x.anyNameHit?' · название':''}</small></div><span class="tag">Выбрать</span></div>`).join('');
+ box.innerHTML=`<div style="font-weight:700;margin-bottom:5px">Возможные совпадения — нажми нужный товар:</div>${rows}`;
+ box.querySelectorAll('[data-ocr-id]').forEach(el=>el.addEventListener('click',()=>lookup(el.dataset.ocrId)));
+}
+async function recognize(auto=false){
+ if(!stream||current||scanPaused)return;
+ if(busy){if(auto)scheduleScan(700);return;}
+ const v=$('video');
+ if(v.readyState<2){if(auto)scheduleScan(800);return;}
+ busy=true;
+ try{
+  await ensureOcr();
+  let best=null,bestText='',bestConf=0;
+  const outputs=[];
+  // Несколько вариантов препроцессинга и PSM — берём лучший по совпадению/уверенности
+  const variants=[
+   ['gray',6],
+   ['contrast',6],
+   ['sharp',6],
+   ['binary',7],
+   ['gray',11],
+   ['inv',6]
+  ];
+  for(const [mode,psm] of variants){
+   try{
+    await ocrWorker.setParameters({tessedit_pageseg_mode:String(psm),preserve_interword_spaces:'1',user_defined_dpi:'300'});
+    const canvas=makeFullLabelCanvas(v,mode);
+    const out=await ocrWorker.recognize(canvas);
+    const raw=String(out.data.text||'').trim();
+    const conf=Number(out.data.confidence||0);
+    if(raw){
+     outputs.push({text:raw,conf,mode,psm});
+     const a=analyzeLabel(raw);
+     const score=(a.strict?10000:0)+(a.ranked[0]?.score||0)+conf*0.3;
+     if(!best||score>((best.strict?10000:0)+(best.ranked[0]?.score||0)+bestConf*0.3)){
+      best=a;bestText=raw;bestConf=conf;
+     }
+     if(a.strict&&conf>55)break; // достаточно хорошее совпадение — не тратим время
+    }
+   }catch(e){/* один вариант упал — пробуем дальше */}
+  }
+  if(best?.strict){
+   const x=best.strict;
+   $('ocrDebug').textContent=`Артикул: ${x.product.offer_id}\nНазвание: ${x.product.name}\nПервое слово: ${best.firstWord||'—'}\nДоп. слова: ${(x.matched||[]).join(', ')||'—'}\nЦвет: ${best.lastWord||'—'}\nСуффикс артикула: ${articleSuffixes(bestText).join(', ')}\nУверенность OCR: ${Math.round(bestConf)}%`;
+   $('ocrInfo').textContent='Совпадение найдено. Проверь товар и нажми +1.';
+   lookup(x.product.offer_id);
+  }else if(best?.ranked?.length){
+   $('ocrInfo').textContent='Есть похожие товары. Автовыбор срабатывает при совпадении артикула + названия. Нажми нужный или поднеси этикетку чётче.';
+   showOcrCandidates(best.ranked);
+   if(outputs[0])$('ocrDebug').textContent='Прочитанный текст:\n'+outputs.sort((a,b)=>b.conf-a.conf)[0].text.slice(0,700);
+  }else{
+   const top=outputs.sort((a,b)=>b.conf-a.conf)[0];
+   $('ocrDebug').textContent=top?('Текст этикетки ('+Math.round(top.conf)+'%):\n'+top.text.slice(0,900)):'Камера пока не прочитала текст. Поднеси этикетку ближе, чтобы она занимала большую часть кадра, и держи ровно.';
+   $('ocrInfo').textContent='Не удалось уверенно прочитать. Покажи этикетку целиком, при хорошем свете, без бликов.';
+  }
+ }catch(e){
+  $('ocrInfo').textContent='Ошибка распознавания: '+e.message;
+ }finally{
+  await ocrWorker?.setParameters({tessedit_pageseg_mode:'6'}).catch(()=>{});
+  busy=false;
+  if(stream&&!current&&!scanPaused)scheduleScan(1100);
+ }
+}
 
 function openReview(){if(!products.length){alert('Сначала загрузи товары из Ozon.');return;}const missing=products.filter(p=>!countedSet.has(p.offer_id));if(!zeroSelectionInitialized){zeroSelected=new Set(missing.map(p=>p.offer_id));zeroSelectionInitialized=true;}renderReview();$('review').classList.remove('hidden');$('review').scrollIntoView({behavior:'smooth',block:'start'});persist();}
 function renderReview(){const missing=products.filter(p=>!countedSet.has(p.offer_id));const counted=products.filter(p=>countedSet.has(p.offer_id));$('reviewCounted').textContent=counted.length;$('reviewZero').textContent=zeroSelected.size;$('reviewSkip').textContent=missing.length-zeroSelected.size;$('missingList').innerHTML=missing.length?missing.map(p=>{const st=(p.warehouse_stocks||{})[String(warehouseId)]||{present:0,reserved:0};return `<label class="checkrow"><input type="checkbox" data-zero="${esc(p.offer_id)}" ${zeroSelected.has(p.offer_id)?'checked':''}><span style="flex:1"><b>${esc(p.offer_id)}</b><small>${esc(p.name)}</small><small>Сейчас Ozon: ${st.present} · резерв: ${st.reserved} · новое: ${zeroSelected.has(p.offer_id)?'0':'без изменений'}</small></span><span class="tag warn">Не сканирован</span></label>`;}).join(''):'<div class="small">Все товары пересчитаны.</div>';$('countedList').innerHTML=counted.length?counted.map(p=>`<div class="item"><div><b>${esc(p.offer_id)}</b><small>${esc(p.name)}</small></div><span class="tag good">${counts.get(p.offer_id)||0} шт.</span></div>`).join(''):'<div class="small">Нет пересчитанных товаров.</div>';$('missingList').querySelectorAll('[data-zero]').forEach(el=>el.addEventListener('change',()=>{el.checked?zeroSelected.add(el.dataset.zero):zeroSelected.delete(el.dataset.zero);renderReview();persist();}));}
