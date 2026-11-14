@@ -82,28 +82,41 @@ async function setCameraZoom(value){const z=Math.max(1,Math.min(4,Number(value)|
 function stopCamera(){clearTimeout(scanTimer);scanTimer=null;scanPaused=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}$('video').srcObject=null;$('video').classList.add('hidden');$('placeholder').classList.remove('hidden');$('frame').classList.add('hidden');$('cameraBtn').textContent='Включить камеру';$('zoomRange').disabled=true;$('zoomInfo').textContent='Увеличение станет доступно после включения камеры.';nativeZoom=null;$('ocrInfo').textContent='Камера выключена.';}
 function scheduleScan(delay=850){clearTimeout(scanTimer);scanTimer=null;if(stream&&!current&&!scanPaused)scanTimer=setTimeout(()=>{scanTimer=null;recognize(true);},delay);}
 function normalizeOcr(s){return String(s||'').toUpperCase().replace(/[ОOQ]/g,'0').replace(/[З]/g,'3').replace(/[IL|]/g,'1').replace(/[Б]/g,'6').replace(/[Ｓ]/g,'5').replace(/[^A-ZА-ЯЁ0-9-]/g,'');}
-function tokenOcr(s){return String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]+/gi,' ').trim().split(/\s+/).filter(x=>x.length>=3);}
-function articleCandidates(text){
+function tokenOcr(s){return String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[^а-я]+/gi,' ').trim().split(/\s+/).filter(x=>x.length>=2);}
+function wordHit(a,b){if(!a||!b)return false;if(a===b)return true;if(a.length>=4&&b.length>=4){let d=0;for(let i=0,j=0;i<a.length&&j<b.length;){if(a[i]===b[j]){i++;j++;}else{d++;if(d>1)return false;if(a.length>=b.length)i++;else j++;}}return d+(a.length-i)+(b.length-j)<=1;}return false;}
+function articleSuffixes(text){
  const raw=String(text||'').toUpperCase().replace(/[ОOQ]/g,'0').replace(/[З]/g,'3').replace(/[IL|]/g,'1').replace(/[Б]/g,'6');
  const out=new Set();
- for(const m of raw.matchAll(/\d{3,}(?:[\s-]+\d{1,5}){1,3}/g)){const c=m[0].replace(/\D/g,'');if(c.length>=5&&c.length<=18)out.add(c);}
- for(const m of raw.matchAll(/\d{7,18}/g))out.add(m[0]);
+ // Ищем только изменяемую часть артикула после постоянного префикса 21242.
+ for(const m of raw.matchAll(/21242[\s-]*([0-9]{1,5})(?:[\s-]+([0-9]{1,5}))?/g)){
+  const suffix=(m[1]||'')+(m[2]||'');if(suffix.length>=1&&suffix.length<=10)out.add(suffix);
+ }
  return [...out];
 }
-function wordHit(a,b){if(a===b)return true;if(a.length>=5&&b.length>=5){let d=0;for(let i=0,j=0;i<a.length&&j<b.length;){if(a[i]===b[j]){i++;j++;}else{d++;if(d>1)return false;if(a.length>=b.length)i++;else j++;}}return d+(a.length-i)+(b.length-j)<=1;}return false;}
+function productArticleSuffix(offerId){const m=String(offerId||'').match(/^21242[\s-]*([0-9]+)(?:[\s-]+([0-9]+))?/i);return m?(m[1]||'')+(m[2]||''):'';}
 function analyzeLabel(text){
- const raw=String(text||'');const compact=articleCandidates(raw);const labelWords=tokenOcr(raw);const lastWord=labelWords.length?labelWords[labelWords.length-1]:'';
+ const raw=String(text||'');const suffixes=articleSuffixes(raw);
+ // Название начинается первым словом этикетки; цвет — последнее текстовое слово.
+ const labelWords=tokenOcr(raw).filter(w=>!/^\d+$/.test(w));
+ const firstWord=labelWords[0]||'';const lastWord=labelWords[labelWords.length-1]||'';
+ const stop=new Set(['для','или','шт','комплект','набор','товар','новый','новая','новое','пластик']);
  const ranked=products.map(p=>{
-  const id=String(p.offer_id||'').replace(/\D/g,'');const articleExact=compact.includes(id);
-  const nameWords=tokenOcr(p.name||'').filter(w=>!['для','или','шт','комплект','набор','товар','черный','черная','черное','белый','белая','белое','серый','серая','серое','красный','красная','синий','синяя'].includes(w));
-  const matched=[...new Set(nameWords.filter(n=>labelWords.some(w=>wordHit(n,w))))];
-  const productLast=tokenOcr(p.name||'').slice(-1)[0]||'';const colorMatch=!!(lastWord&&productLast&&wordHit(lastWord,productLast));
-  return {product:p,articleExact,wordMatches:matched.length,matched,colorMatch,score:(articleExact?100:0)+matched.length*10+(colorMatch?5:0)};
- }).filter(x=>x.articleExact||x.wordMatches>=2).sort((a,b)=>b.score-a.score);
- const strict=ranked.find(x=>x.articleExact&&x.wordMatches>=2);
- return {strict,ranked:ranked.slice(0,5),compact,labelWords,lastWord};
+  const idSuffix=productArticleSuffix(p.offer_id);const articleExact=!!idSuffix&&suffixes.includes(idSuffix);
+  const nameWords=tokenOcr(p.name||'');const productFirst=nameWords[0]||'';const productColor=nameWords[nameWords.length-1]||'';
+  const firstMatch=!!(firstWord&&productFirst&&wordHit(firstWord,productFirst));
+  const colorMatch=!!(lastWord&&productColor&&wordHit(lastWord,productColor));
+  const middle=nameWords.slice(1,-1).filter(w=>!stop.has(w));
+  const labelMiddle=labelWords.slice(1,-1);
+  const matched=[...new Set(middle.filter(n=>labelMiddle.some(w=>wordHit(n,w))))];
+  const score=(articleExact?100:0)+(firstMatch?35:0)+(colorMatch?35:0)+Math.min(matched.length,2)*12;
+  return {product:p,articleExact,wordMatches:matched.length,matched,colorMatch,firstMatch,score,productFirst,productColor};
+ }).filter(x=>x.firstMatch||x.colorMatch||x.articleExact).sort((a,b)=>b.score-a.score);
+ // Автоподтверждение требует всех четырёх условий: артикул после 21242,
+ // первое слово, цвет в конце и хотя бы одно дополнительное слово названия.
+ const strict=ranked.find(x=>x.articleExact&&x.firstMatch&&x.colorMatch&&x.wordMatches>=1);
+ return {strict,ranked:ranked.slice(0,5),suffixes,labelWords,firstWord,lastWord};
 }
-async function ensureOcr(){if(ocrWorker)return;$('ocrInfo').textContent='Загружаю русско-английскую модель распознавания… при первом запуске подожди.';ocrWorker=await Tesseract.createWorker('rus+eng',1,{logger:m=>{if(m.status==='recognizing text')$('ocrInfo').textContent=`Читаю всю этикетку… ${Math.round((m.progress||0)*100)}%`;}});await ocrWorker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1',user_defined_dpi:'250'});}
+async function ensureOcr(){if(ocrWorker)return;$('ocrInfo').textContent='Загружаю русскую модель распознавания…';ocrWorker=await Tesseract.createWorker('rus',1,{logger:m=>{if(m.status==='recognizing text')$('ocrInfo').textContent=`Читаю русскую этикетку… ${Math.round((m.progress||0)*100)}%`;}});await ocrWorker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1',user_defined_dpi:'250'});}
 function makeFullLabelCanvas(video,mode='gray'){
  const c=$('canvas'),ctx=c.getContext('2d',{willReadFrequently:true}),vw=video.videoWidth,vh=video.videoHeight;const cam=$('video').parentElement.getBoundingClientRect();const scale=Math.max(cam.width/vw,cam.height/vh),z=nativeZoom?1:digitalZoom;const sw=Math.min(vw,cam.width/(scale*z)),sh=Math.min(vh,cam.height/(scale*z)),sx=(vw-sw)/2,sy=(vh-sh)/2;const targetW=Math.min(1600,Math.max(1100,Math.round(sw)));c.width=targetW;c.height=Math.round(targetW*sh/sw);
  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(video,sx,sy,sw,sh,0,0,c.width,c.height);
@@ -113,11 +126,14 @@ function makeFullLabelCanvas(video,mode='gray'){
  ctx.putImageData(im,0,0);return c;
 }
 function showOcrCandidates(items){const box=$('ocrDebug');if(!items.length)return;const rows=items.map(x=>`<div class="item" data-ocr-id="${esc(x.product.offer_id)}"><div><b>${esc(x.product.offer_id)}</b><small>${esc(x.product.name)} · слов совпало: ${x.wordMatches}${x.colorMatch?' · цвет совпал':''}${x.articleExact?' · артикул найден':''}</small></div><span class="tag">Проверить</span></div>`).join('');box.innerHTML=`<div style="font-weight:700;margin-bottom:5px">Возможные совпадения — нажми нужный товар:</div>${rows}`;box.querySelectorAll('[data-ocr-id]').forEach(el=>el.addEventListener('click',()=>lookup(el.dataset.ocrId)));}
-async function recognize(auto=false){if(!stream||current||scanPaused)return;if(busy){if(auto)scheduleScan(700);return;}const v=$('video');if(v.readyState<2){if(auto)scheduleScan(800);return;}busy=true;try{await ensureOcr();let bestText='',best=null;const outputs=[];for(const [mode,psm] of [['gray',6],['contrast',11]]){await ocrWorker.setParameters({tessedit_pageseg_mode:String(psm),preserve_interword_spaces:'1',user_defined_dpi:'250'});const out=await ocrWorker.recognize(makeFullLabelCanvas(v,mode));const raw=String(out.data.text||'').trim();if(raw)outputs.push(raw);const a=analyzeLabel(raw);if(a.strict){best=a;bestText=raw;break;}if(!best||a.ranked[0]?.score>(best.ranked[0]?.score||0)){best=a;bestText=raw;}}
- if(best?.strict){const x=best.strict;$('ocrDebug').textContent=`Артикул: ${x.product.offer_id}\nНазвание: ${x.product.name}\nПроверка названия: совпало слов — ${x.wordMatches} (${x.matched.join(', ')})\nПоследнее слово/цвет: ${best.lastWord||'не прочитан'} ${x.colorMatch?'✓':'(не совпал или не определён)'}`;$('ocrInfo').textContent='Артикул и несколько слов названия совпали. Проверь карточку товара и нажми +1.';lookup(x.product.offer_id);}
- else if(best?.ranked?.length){$('ocrInfo').textContent='Нашёл похожие варианты, но автоматом товар не выбираю. Проверь список ниже.';showOcrCandidates(best.ranked);}
- else{$('ocrDebug').textContent=outputs.length?('Текст всей этикетки:\n'+outputs[0].slice(0,900)):'Камера пока не прочитала текст. Поднеси этикетку ближе, чтобы она занимала большую часть кадра.';$('ocrInfo').textContent='Пока нет надёжного совпадения артикула и названия. Не нужно целиться в отдельную строку — покажи этикетку целиком.';}
- }catch(e){$('ocrInfo').textContent='Ошибка распознавания: '+e.message;}finally{await ocrWorker?.setParameters({tessedit_pageseg_mode:'6'}).catch(()=>{});busy=false;if(stream&&!current&&!scanPaused)scheduleScan(2400);}}
+async function recognize(auto=false){if(!stream||current||scanPaused)return;if(busy){if(auto)scheduleScan(700);return;}const v=$('video');if(v.readyState<2){if(auto)scheduleScan(800);return;}busy=true;try{await ensureOcr();let best=null,bestText='';const outputs=[];
+ // Основной быстрый проход. Второй, более чувствительный, запускаем только если первый не дал строгого совпадения.
+ for(const [mode,psm] of [['gray',6],['contrast',11]]){await ocrWorker.setParameters({tessedit_pageseg_mode:String(psm),preserve_interword_spaces:'1',user_defined_dpi:'250'});const out=await ocrWorker.recognize(makeFullLabelCanvas(v,mode));const raw=String(out.data.text||'').trim();if(raw)outputs.push(raw);const a=analyzeLabel(raw);if(!best||((a.strict?10000:0)+(a.ranked[0]?.score||0))>((best.strict?10000:0)+(best.ranked[0]?.score||0))){best=a;bestText=raw;}if(a.strict)break;}
+ if(best?.strict){const x=best.strict;$('ocrDebug').textContent=`Артикул: ${x.product.offer_id}\nНазвание: ${x.product.name}\nПервое слово: ${best.firstWord} ✓\nДополнительные слова: ${x.matched.join(', ')} ✓\nЦвет в конце: ${best.lastWord} ✓\nОкончание артикула после 21242: ${articleSuffixes(bestText).join(', ')} ✓`;$('ocrInfo').textContent='Совпали артикул, начало названия, дополнительные слова и цвет. Проверь товар и нажми +1.';lookup(x.product.offer_id);}
+ else if(best?.ranked?.length){$('ocrInfo').textContent='Есть похожие товары. Для автоматического выбора должны совпасть артикул после 21242, первое слово, цвет и хотя бы одно дополнительное слово.';showOcrCandidates(best.ranked);}
+ else{$('ocrDebug').textContent=outputs.length?('Текст всей этикетки:\n'+outputs[0].slice(0,900)):'Камера пока не прочитала текст. Поднеси этикетку ближе, чтобы она занимала большую часть кадра.';$('ocrInfo').textContent='Не удалось прочитать достаточно данных. Покажи этикетку целиком и поднеси её ближе.';}
+ }catch(e){$('ocrInfo').textContent='Ошибка распознавания: '+e.message;}finally{await ocrWorker?.setParameters({tessedit_pageseg_mode:'6'}).catch(()=>{});busy=false;if(stream&&!current&&!scanPaused)scheduleScan(1300);}}
+
 function openReview(){if(!products.length){alert('Сначала загрузи товары из Ozon.');return;}const missing=products.filter(p=>!countedSet.has(p.offer_id));if(!zeroSelectionInitialized){zeroSelected=new Set(missing.map(p=>p.offer_id));zeroSelectionInitialized=true;}renderReview();$('review').classList.remove('hidden');$('review').scrollIntoView({behavior:'smooth',block:'start'});persist();}
 function renderReview(){const missing=products.filter(p=>!countedSet.has(p.offer_id));const counted=products.filter(p=>countedSet.has(p.offer_id));$('reviewCounted').textContent=counted.length;$('reviewZero').textContent=zeroSelected.size;$('reviewSkip').textContent=missing.length-zeroSelected.size;$('missingList').innerHTML=missing.length?missing.map(p=>{const st=(p.warehouse_stocks||{})[String(warehouseId)]||{present:0,reserved:0};return `<label class="checkrow"><input type="checkbox" data-zero="${esc(p.offer_id)}" ${zeroSelected.has(p.offer_id)?'checked':''}><span style="flex:1"><b>${esc(p.offer_id)}</b><small>${esc(p.name)}</small><small>Сейчас Ozon: ${st.present} · резерв: ${st.reserved} · новое: ${zeroSelected.has(p.offer_id)?'0':'без изменений'}</small></span><span class="tag warn">Не сканирован</span></label>`;}).join(''):'<div class="small">Все товары пересчитаны.</div>';$('countedList').innerHTML=counted.length?counted.map(p=>`<div class="item"><div><b>${esc(p.offer_id)}</b><small>${esc(p.name)}</small></div><span class="tag good">${counts.get(p.offer_id)||0} шт.</span></div>`).join(''):'<div class="small">Нет пересчитанных товаров.</div>';$('missingList').querySelectorAll('[data-zero]').forEach(el=>el.addEventListener('change',()=>{el.checked?zeroSelected.add(el.dataset.zero):zeroSelected.delete(el.dataset.zero);renderReview();persist();}));}
 async function send(){const chosen=products.filter(p=>countedSet.has(p.offer_id)||zeroSelected.has(p.offer_id));if(!chosen.length){alert('Нет товаров для отправки.');return;}const skipped=products.length-chosen.length;const zeros=chosen.filter(p=>!countedSet.has(p.offer_id)).length;const message=`Отправить остатки в Ozon?\n\nСклад: ${selectedWarehouse()?.name||warehouseId}\nТоваров к обновлению: ${chosen.length}\nНепросканированных с остатком 0: ${zeros}\nПропущенных без изменений: ${skipped}\n\nЭто действие изменит остатки в кабинете Ozon. Отменить отправку после применения нельзя.`;if(!confirm(message))return;$('sendBtn').disabled=true;$('sendResult').textContent='Отправляю остатки в Ozon. Не закрывай страницу…';try{const payload={warehouse_id:Number(warehouseId),items:chosen.map(p=>({offer_id:p.offer_id,product_id:p.product_id,sku:p.sku,quantity:countedSet.has(p.offer_id)?(counts.get(p.offer_id)||0):0}))};const d=await api('/api/stocks/update','POST',payload);const failed=d.results.filter(r=>!r.updated);const warnings=d.results.filter(r=>r.reserved_exceeds_count);let msg=`Ozon подтвердил обновление: ${d.updated} из ${d.total}. Ошибок: ${d.failed}.`;if(warnings.length)msg+=` Внимание: у ${warnings.length} товаров резерв больше пересчитанного количества; доступный остаток отправлен как 0, резерв останется.`;if(failed.length)msg+='\nОшибки:\n'+failed.slice(0,12).map(r=>`${r.offer_id}: ${(r.errors||[]).join(', ')}`).join('\n');$('sendResult').textContent=msg;setStatus(d.failed?'Есть ошибки':'Остатки отправлены');}catch(e){$('sendResult').textContent='Ошибка отправки: '+e.message;setStatus('Ошибка отправки');}finally{$('sendBtn').disabled=false;}}
