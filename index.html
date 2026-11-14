@@ -1,147 +1,233 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111318">
-<title>Мой склад — Ozon API</title>
-<style>
-:root{color-scheme:dark;--bg:#111318;--panel:#1a1e26;--panel2:#242b37;--line:#343d4b;--text:#f2f5fa;--muted:#9ba7b8;--blue:#85a4ff;--green:#45d6a0;--red:#ff737d;--amber:#f4c76d}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial}.wrap{max-width:780px;margin:auto;padding:18px 14px 44px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.brand{display:flex;gap:11px;align-items:center}.logo{width:43px;height:43px;border-radius:14px;background:var(--blue);color:#111827;display:grid;place-items:center;font-size:25px;font-weight:900}.brand h1{font-size:20px;margin:0}.brand p{font-size:12px;color:var(--muted);margin:2px 0}.pill{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:30px;padding:7px 10px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:16px;margin:13px 0}.panel h2{font-size:16px;margin:0 0 12px}.muted,.small{color:var(--muted)}.small{font-size:12px}.btn{border:0;border-radius:12px;padding:12px 14px;font:700 14px system-ui;cursor:pointer;display:inline-flex;justify-content:center;align-items:center;gap:7px}.btn:disabled{opacity:.4;cursor:not-allowed}.primary{background:var(--blue);color:#111827}.success{background:var(--green);color:#071a13}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{background:#51272e;color:#ffd9dc}.wide{width:100%}.row{display:flex;gap:9px;align-items:center}.row>*{min-width:0}.field,select{width:100%;background:#10141b;border:1px solid var(--line);border-radius:11px;color:var(--text);padding:12px;font:inherit}.field:focus,select:focus{outline:1px solid var(--blue)}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:var(--panel2);padding:11px;border-radius:12px}.stat b{font-size:23px;display:block}.stat span{font-size:11px;color:var(--muted)}.progress{height:8px;border-radius:20px;background:#303744;overflow:hidden;margin:12px 0 5px}.progress i{display:block;height:100%;background:var(--green);width:0}.camera{position:relative;aspect-ratio:4/3;background:#080a0e;border-radius:14px;overflow:hidden;display:grid;place-items:center}.camera video{width:100%;height:100%;object-fit:cover;transform:scale(var(--camera-zoom,1));transform-origin:center center}.placeholder{position:absolute;text-align:center;color:#ccd3df;padding:20px}.frame{position:absolute;inset:7% 6% 7%;border:2px solid var(--green);border-radius:10px;pointer-events:none;box-shadow:0 0 0 999px rgba(0,0,0,.18)}.frame span{position:absolute;left:0;right:0;top:-25px;text-align:center;color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 4px #000}.setup-head{justify-content:space-between}.compact-btn{padding:7px 10px;font-size:12px}.setup-panel.collapsed{padding:11px 14px}.setup-panel.collapsed #configFields{display:none}.setup-panel.collapsed #connectionInfo{margin-top:5px!important}.scan-hint{font-size:12px;color:var(--muted)}.found{margin-top:13px;background:#14271f;border:1px solid #36785f;border-radius:14px;padding:14px}.article{font-size:25px;font-weight:850;letter-spacing:.4px}.name{color:#d7e6dd;margin:4px 0}.qty{display:flex;justify-content:space-between;align-items:center;margin:12px 0}.qty b{font-size:36px;color:var(--green)}.hidden{display:none!important}.notice{padding:11px;border-radius:11px;background:#292719;color:#f4d990;font-size:13px;margin-top:10px}.error{background:#321f24;color:#ffb6bd}.list{max-height:300px;overflow:auto}.item{padding:11px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.item:last-child{border:0}.item small{display:block;color:var(--muted);font-size:11px}.tag{font-size:10px;border-radius:30px;padding:4px 7px;background:#273247;color:#b9c9ff;white-space:nowrap}.tag.warn{background:#39301b;color:#f4d990}.tag.good{background:#17382b;color:#9be7c2}.checkrow{display:flex;align-items:flex-start;gap:9px;padding:10px 0;border-bottom:1px solid var(--line)}.checkrow input{width:18px;height:18px;accent-color:var(--green);margin-top:2px}.foot{text-align:center;color:var(--muted);font-size:11px;margin-top:20px}.hidden{display:none!important}@media(max-width:600px){.wrap{padding:10px 9px calc(28px + env(safe-area-inset-bottom))}.top{align-items:flex-start;margin-bottom:10px}.brand{gap:8px}.logo{width:38px;height:38px;border-radius:12px}.brand h1{font-size:17px}.brand p{font-size:11px}.pill{font-size:10px;padding:6px 8px}.panel{padding:12px;border-radius:14px;margin:9px 0}.panel h2{font-size:15px}.row{gap:7px}.row:not(.setup-head){flex-wrap:wrap}.row:not(.setup-head)>.btn{flex:1 1 auto}.field,select{min-width:0;font-size:16px}.grid{gap:6px}.stat{padding:8px}.stat b{font-size:20px}.stat span{font-size:10px}.camera{aspect-ratio:1/1;max-height:62vh}.frame{inset:7% 5% 7%}.article{font-size:22px}.qty b{font-size:32px}.found{padding:12px}.found .btn{min-height:54px;font-size:19px!important}.list{max-height:240px}.checkrow{gap:7px}.checkrow span{overflow-wrap:anywhere}.camera-actions{display:block}.zoom-control{display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 11px;background:#10141b;border:1px solid var(--line);border-radius:11px}.zoom-control input{flex:1;min-width:0;accent-color:var(--green)}.zoom-control b{min-width:42px;text-align:right;font-variant-numeric:tabular-nums}.camera-actions .btn{width:100%;min-height:46px}.setup-head{flex-wrap:wrap}.setup-head .row{flex-wrap:nowrap}.setup-panel .row .btn{font-size:12px;padding:10px}.notice{font-size:12px}}@media(max-width:360px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.stat span{font-size:9px}.top{gap:6px}.pill{max-width:110px;text-align:center}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111318">
+  <meta name="description" content="Сканирование артикулов и пересчёт остатков товаров для Ozon">
+  <title>Мой склад — пересчёт Ozon</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%237c9cff'/%3E%3Cpath d='M25 30h50v10H25zm0 18h50v10H25zm0 18h32v10H25z' fill='white'/%3E%3C/svg%3E">
+  <style>
+    :root{color-scheme:dark;--bg:#111318;--panel:#1a1e26;--panel2:#222834;--line:#303744;--text:#f1f4f9;--muted:#9aa5b5;--blue:#7c9cff;--green:#46d39a;--red:#ff737d;--amber:#f3c66d;--radius:18px}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif} button,input{font:inherit} button{cursor:pointer;border:0} button:disabled{opacity:.45;cursor:not-allowed}
+    .wrap{width:min(760px,100%);margin:0 auto;padding:22px 16px 48px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:13px;background:var(--blue);display:grid;place-items:center;color:#111827;font-size:23px;font-weight:900}.brand h1{font-size:20px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}.pill{border:1px solid var(--line);border-radius:999px;padding:7px 11px;color:var(--muted);font-size:12px;white-space:nowrap}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin:14px 0}.panel h2{font-size:17px;margin:0 0 12px}.muted{color:var(--muted)}.small{font-size:12px;color:var(--muted)}
+    .upload{border:1.5px dashed #4a5669;background:var(--panel);border-radius:var(--radius);padding:24px 16px;text-align:center}.upload strong{display:block;font-size:17px;margin:7px 0}.upload p{color:var(--muted);font-size:13px;margin:0 0 15px}.btn{border-radius:13px;padding:13px 16px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.15s}.primary{background:var(--blue);color:#101522}.success{background:var(--green);color:#071a13}.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{background:#51272e;color:#ffd9dc;border:1px solid #7d3a43}.wide{width:100%}.btnrow{display:flex;gap:9px;flex-wrap:wrap}.btnrow .btn{flex:1}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{background:var(--panel2);border-radius:14px;padding:13px}.stat b{font-size:24px;display:block;font-variant-numeric:tabular-nums}.stat span{font-size:11px;color:var(--muted)}.progress{height:8px;background:#303744;border-radius:20px;overflow:hidden;margin:13px 0 5px}.progress>i{height:100%;display:block;background:var(--green);width:0;transition:width .2s}
+    .camera{position:relative;background:#080a0e;border-radius:16px;overflow:hidden;aspect-ratio:4/3;display:grid;place-items:center}.camera video{width:100%;height:100%;object-fit:cover}.camera .placeholder{position:absolute;text-align:center;color:#c4ccda;padding:20px}.camera .frame{position:absolute;inset:20% 9%;border:2px solid rgba(124,156,255,.95);border-radius:13px;box-shadow:0 0 0 999px rgba(0,0,0,.12);pointer-events:none}.camera .camtag{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:12px;color:white;text-shadow:0 1px 4px #000}
+    .found{border:1px solid #36785f;background:#14271f;border-radius:15px;padding:15px;margin-top:13px}.found .article{font-size:23px;font-weight:800;letter-spacing:.5px}.found .name{margin:6px 0 0;color:#d5e4dc}.qty{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0}.qty b{font-size:34px;color:var(--green);font-variant-numeric:tabular-nums}.notice{padding:12px 13px;border-radius:12px;background:#292719;color:#f4d990;font-size:13px;margin-top:12px}.error{background:#321f24;color:#ffb6bd}.hidden{display:none!important}
+    .field{width:100%;background:#10141b;border:1px solid var(--line);color:var(--text);border-radius:12px;padding:13px;outline:none}.field:focus{border-color:var(--blue)}.result-list{max-height:280px;overflow:auto;margin-top:8px}.result-item{padding:11px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;cursor:pointer}.result-item:active{background:var(--panel2)}.result-item small{display:block;color:var(--muted);margin-top:3px}.recent{max-height:300px;overflow:auto}.recent-row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.recent-row:last-child{border:0}.recent-row b{font-variant-numeric:tabular-nums;color:var(--green)}
+    .foot{color:var(--muted);font-size:11px;text-align:center;margin-top:22px}.file-name{font-size:12px;color:var(--green);margin-top:8px;word-break:break-all}
+    @media(max-width:420px){.wrap{padding:16px 12px 36px}.panel{padding:15px}.stats{gap:6px}.stat{padding:10px}.stat b{font-size:21px}.brand h1{font-size:18px}.pill{font-size:10px}}
+  </style>
 </head>
-<body><div class="wrap">
-<header class="top"><div class="brand"><div class="logo">＋</div><div><h1>Мой склад</h1><p>Инвентаризация через Ozon API</p></div></div><div class="pill" id="status">Не подключено</div></header>
-<section class="panel setup-panel" id="setupPanel"><div class="row setup-head"><h2 style="margin:0">Подключение</h2><div class="row"><button class="btn secondary compact-btn hidden" id="testConnectionCompact">Проверить</button><button class="btn secondary compact-btn hidden" id="editConfig">Изменить</button></div></div><div id="configFields"><p class="small">Укажи адрес Cloudflare Worker и пароль приложения. Client-Id и Api-Key Ozon здесь вводить не нужно — они хранятся только в Cloudflare.</p><label class="small">URL Cloudflare Worker</label><input class="field" id="workerUrl" placeholder="https://ozon-inventory-api.ТВОЙ-АККАУНТ.workers.dev" style="margin:5px 0 10px"><label class="small">Пароль приложения (APP_TOKEN)</label><input class="field" id="appToken" type="password" placeholder="Пароль, который задашь в Cloudflare" style="margin:5px 0 10px"><div class="row"><button class="btn primary" id="saveConfig">Сохранить подключение</button><button class="btn secondary" id="testConnection">Проверить</button></div></div><div id="connectionInfo" class="small" style="margin-top:9px">Сначала настрой Worker по инструкции в README.</div></section>
-<main id="app" class="hidden">
-<section class="panel"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Каталог Ozon</h2><span class="tag" id="catalogTag">Не загружен</span></div><p class="small">Получаем товары и актуальные резервы с твоего FBS-склада.</p><button class="btn primary wide" id="loadCatalog">↻ Обновить каталог из Ozon</button><div id="warehouseWrap" class="hidden" style="margin-top:12px"><label class="small">Склад для пересчёта</label><select id="warehouseSelect" style="margin-top:5px"></select></div><div id="catalogInfo" class="small" style="margin-top:9px"></div></section>
-<section class="panel"><div class="grid"><div class="stat"><b id="total">0</b><span>товаров</span></div><div class="stat"><b id="counted">0</b><span>пересчитано</span></div><div class="stat"><b id="pieces">0</b><span>штук</span></div></div><div class="progress"><i id="progressBar"></i></div><div class="small" id="progressText">Загрузи каталог Ozon</div></section>
-<section class="panel" id="scanPanel"><h2>Сканирование этикетки</h2><div class="camera"><video id="video" autoplay playsinline muted class="hidden"></video><div class="placeholder" id="placeholder"><div style="font-size:38px">▣</div><b>Камера выключена</b><div class="small">Покажи этикетку целиком, чтобы были видны название и артикул</div></div><div class="frame hidden" id="frame"><span>Помести сюда этикетку целиком</span></div></div><div class="row camera-actions" style="margin-top:10px"><button class="btn primary wide" id="cameraBtn">Включить камеру</button></div><div class="zoom-control"><label for="zoomRange" class="small">Зум</label><input id="zoomRange" type="range" min="1" max="4" step="0.1" value="1" disabled><b id="zoomValue">1.0×</b></div><div class="small" id="zoomInfo">Увеличение станет доступно после включения камеры.</div><div class="small" id="ocrInfo" style="margin-top:8px">Автосканирование всей этикетки: ищем артикул и сверяем его с несколькими словами названия и цветом.</div><div class="small" id="ocrDebug" style="margin-top:6px;padding:8px 10px;border-radius:9px;background:#10141b;color:#b9c4d4;white-space:pre-wrap;overflow-wrap:anywhere">Последний результат распознавания появится здесь.</div><div class="row" style="margin-top:12px"><input class="field" id="manual" placeholder="Артикул, например 21242-4-1"><button class="btn secondary" id="find">Найти</button></div><div id="match" class="found hidden"><div class="small" style="color:#9bd9bd">ТОВАР НАЙДЕН В OZON</div><div class="article" id="matchArticle"></div><div class="name" id="matchName"></div><div class="small" id="matchStock"></div><div class="qty"><span>Пересчитано</span><b id="matchQty">0</b></div><button class="btn success wide" id="plus" style="font-size:20px;padding:16px">＋ 1 · учесть и дальше</button></div><div id="notFound" class="notice error hidden"></div></section>
-<section class="panel"><h2>Поиск товара</h2><input class="field" id="search" placeholder="Поиск по артикулу или названию"><div id="searchResults" class="list"></div></section>
-<section class="panel"><h2>Последние пересчитанные</h2><div id="recent" class="list small">Пока ничего не отсканировано</div></section>
-<section class="panel"><h2>Проверка перед отправкой</h2><p class="small">Все непросканированные товары будут предложены к обнулению. Можно снять галочку с товара, если его остаток нужно оставить без изменений.</p><button class="btn secondary wide" id="reviewBtn">Проверить остатки</button><div id="review" class="hidden" style="margin-top:13px"><div class="grid"><div class="stat"><b id="reviewCounted">0</b><span>с количеством</span></div><div class="stat"><b id="reviewZero">0</b><span>в 0</span></div><div class="stat"><b id="reviewSkip">0</b><span>без изменений</span></div></div><div class="row" style="margin:12px 0"><button class="btn secondary" id="selectAllZero">Обнулить все пропущенные</button><button class="btn secondary" id="clearZero">Не обнулять пропущенные</button></div><h3 style="font-size:14px">Непросканированные товары</h3><div id="missingList" class="list"></div><h3 style="font-size:14px;margin-top:15px">Пересчитанные товары</h3><div id="countedList" class="list"></div><div class="notice">Важно: перед отправкой Worker повторно проверит актуальные резервы в Ozon. Если на товаре есть резерв, он будет вычтен из физического количества при передаче доступного остатка. Зарезервированные единицы Ozon не позволяет обнулить этим методом.</div><button class="btn success wide" id="sendBtn" style="margin-top:13px">Отправить подтверждённые остатки в Ozon</button><div id="sendResult" class="small" style="margin-top:10px"></div></div></section>
-<section class="panel"><h2>Резервная копия</h2><div class="row"><button class="btn secondary" id="backup">Скачать копию</button><label class="btn secondary" for="restore">Восстановить копию</label><button class="btn danger" id="reset">Начать новый пересчёт</button><input id="restore" type="file" accept=".json,application/json" hidden></div><p class="small">Прогресс хранится в браузере этого устройства. Для переноса на другое устройство используй резервную копию.</p></section>
-</main><div class="foot">API-ключи Ozon не передаются в браузер. Запись остатков выполняется только после ручного подтверждения.</div></div>
-<canvas id="canvas" class="hidden"></canvas><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script>
-(()=>{
-const $=id=>document.getElementById(id), CONFIG='ozonInvApiConfig_v1', STORE='ozonInvApiSession_v1', CATALOG_CACHE='ozonInvCatalogCache_v2';
-let workerUrl='',appToken='',products=[],warehouses=[],warehouseId='',counts=new Map(),countedSet=new Set(),zeroSelected=new Set(),zeroSelectionInitialized=false,current=null,stream=null,ocrWorker=null,busy=false,recent=[],scanTimer=null,scanPaused=false,digitalZoom=1,nativeZoom=null,nativeZoomMin=1,nativeZoomMax=1;
-const norm=s=>String(s??'').trim().replace(/\s+/g,'').toUpperCase();
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const selectedWarehouse=()=>warehouses.find(w=>String(w.warehouse_id)===String(warehouseId));
-function setStatus(t){$('status').textContent=t;}
-function persist(){try{localStorage.setItem(STORE,JSON.stringify({products,warehouses,warehouseId,counts:[...counts],counted:[...countedSet],zeroSelected:[...zeroSelected],zeroSelectionInitialized,recent}));}catch(e){$('catalogInfo').textContent='Не удалось сохранить прогресс. Скачай резервную копию.';}}
-function stats(){const n=countedSet.size,p=[...counts.values()].reduce((a,b)=>a+b,0);$('total').textContent=products.length;$('counted').textContent=n;$('pieces').textContent=p;$('progressBar').style.width=(products.length?n/products.length*100:0)+'%';$('progressText').textContent=`Пересчитано ${n} из ${products.length} товаров`;$('recent').innerHTML=recent.length?recent.slice(0,25).map(x=>`<div class="item"><div><b>${esc(x.offer_id)}</b><small>${esc(x.name)}</small></div><b>× ${x.qty}</b></div>`).join(''):'Пока ничего не отсканировано';}
-async function api(path,method='GET',body){
-  if(!workerUrl||!appToken)throw new Error('Сначала сохрани URL Worker и пароль приложения.');
-  const url=workerUrl.replace(/\/$/,'')+path;
-  const retryable=(path==='/api/health'||path==='/api/catalog');
-  const attempts=retryable?3:1;
-  let lastError;
-  for(let attempt=0;attempt<attempts;attempt++){
-    const controller=new AbortController();
-    const timeoutMs=path==='/api/catalog'?90000:25000;
-    const timer=setTimeout(()=>controller.abort(),timeoutMs);
-    try{
-      const headers={'X-App-Token':appToken};
-      if(body!==undefined)headers['Content-Type']='application/json';
-      const r=await fetch(url,{method,headers,body:body!==undefined?JSON.stringify(body):undefined,signal:controller.signal,cache:'no-store',mode:'cors',credentials:'omit'});
-      const raw=await r.text();
-      let d;
-      try{d=raw?JSON.parse(raw):{};}catch(parseError){
-        const preview=String(raw||'').slice(0,260).replace(/\s+/g,' ');
-        throw new Error(`Worker вернул некорректный JSON (HTTP ${r.status}, ${raw.length} байт). Ответ: ${preview||'пустой ответ'}`);
-      }
-      if(!r.ok)throw new Error(d.error||`HTTP ${r.status}`);
-      if(d.error)throw new Error(d.error);
-      return d;
-    }catch(e){
-      lastError=e;
-      const networkFailure=e instanceof TypeError||e.name==='AbortError';
-      if(!retryable||!networkFailure||attempt===attempts-1){
-        if(e.name==='AbortError')throw new Error(path==='/api/catalog'?'Worker не успел загрузить каталог за 90 секунд. Попробуй ещё раз.':'Истекло время ожидания ответа Worker.');
-        if(e instanceof TypeError)throw new Error('Safari не смог завершить сетевой запрос к Worker. Повторные попытки не помогли.');
-        throw e;
-      }
-      await new Promise(resolve=>setTimeout(resolve,700*(attempt+1)));
-    }finally{clearTimeout(timer);}
-  }
-  throw lastError||new Error('Не удалось связаться с Worker.');
-}
-function collapseConfig(){ $('setupPanel').classList.add('collapsed');$('editConfig').classList.remove('hidden');$('testConnectionCompact').classList.remove('hidden'); }
-function expandConfig(){ $('setupPanel').classList.remove('collapsed');$('editConfig').classList.add('hidden');$('testConnectionCompact').classList.add('hidden'); }
-function saveConfig(){workerUrl=$('workerUrl').value.trim();appToken=$('appToken').value.trim();if(!/^https:\/\//i.test(workerUrl)||!appToken){$('connectionInfo').textContent='Укажи HTTPS-адрес Worker и пароль APP_TOKEN.';return false;}localStorage.setItem(CONFIG,JSON.stringify({workerUrl,appToken}));$('connectionInfo').textContent='Настройки подключения сохранены.';collapseConfig();return true;}
-async function testConnection(){try{if(!$('setupPanel').classList.contains('collapsed')&&!saveConfig())return;const d=await api('/api/health');$('connectionInfo').textContent=d.ok?'Соединение с Worker установлено.':'Worker ответил неожиданно.';setStatus('Worker подключён');$('app').classList.remove('hidden');collapseConfig();}catch(e){$('connectionInfo').textContent='Ошибка подключения: '+e.message;setStatus('Ошибка API');expandConfig();}}
-function findProduct(raw){const key=norm(raw);return products.find(p=>norm(p.offer_id)===key)||null;}
-function showMatch(p){clearTimeout(scanTimer);scanTimer=null;scanPaused=true;current=p;$('matchArticle').textContent=p.offer_id;$('matchName').textContent=p.name;$('matchQty').textContent=counts.get(p.offer_id)||0;const st=(p.warehouse_stocks||{})[String(warehouseId)]||{present:0,reserved:0,free_stock:0};$('matchStock').textContent=`Сейчас в Ozon: ${st.present} шт. · резерв: ${st.reserved} шт.`;$('match').classList.remove('hidden');$('notFound').classList.add('hidden');$('manual').value=p.offer_id;$('match').scrollIntoView({behavior:'smooth',block:'nearest'});}
-function lookup(raw){if(!products.length){$('notFound').textContent='Сначала загрузи каталог Ozon.';$('notFound').classList.remove('hidden');return;}const p=findProduct(raw);if(!p){$('match').classList.add('hidden');$('notFound').textContent=`Артикул «${raw}» не найден в каталоге Ozon. Проверь распознавание или введи артикул вручную.`;$('notFound').classList.remove('hidden');return;}showMatch(p);}
-function addOne(){if(!current)return;const id=current.offer_id;counts.set(id,(counts.get(id)||0)+1);countedSet.add(id);zeroSelected.delete(id);recent.unshift({offer_id:id,name:current.name,qty:counts.get(id)});current=null;scanPaused=false;$('match').classList.add('hidden');$('notFound').classList.add('hidden');$('manual').value='';$('review').classList.add('hidden');$('ocrDebug').textContent=`Последний товар: ${id} · учтено ${counts.get(id)} шт.
-Ожидаю следующую этикетку…`;$('ocrInfo').textContent='Остаток отмечен. Перемести в рамку следующую этикетку — сканирование продолжится автоматически.';stats();persist();if(stream)scheduleScan(1000);}
-function renderSearch(){const q=norm($('search').value);if(!q){$('searchResults').innerHTML='';return;}const hits=products.filter(p=>norm(p.offer_id).includes(q)||norm(p.name).includes(q)).slice(0,40);$('searchResults').innerHTML=hits.length?hits.map(p=>`<div class="item" data-id="${esc(p.offer_id)}"><div><b>${esc(p.offer_id)}</b><small>${esc(p.name)}</small></div><div style="text-align:right"><b>${counts.get(p.offer_id)||0}</b><small>пересчитано</small></div></div>`).join(''):'<div class="small" style="padding:10px">Ничего не найдено</div>';$('searchResults').querySelectorAll('[data-id]').forEach(el=>el.addEventListener('click',()=>showMatch(findProduct(el.dataset.id))));}
-async function loadCatalog(){try{$('loadCatalog').disabled=true;$('catalogInfo').textContent='Запрашиваю каталог…';const started=performance.now();const d=await api('/api/catalog','POST',{});const clientMs=Math.round(performance.now()-started);products=d.products||[];warehouses=d.warehouses||[];if(!products.length){const diag=d.diagnostics?` Диагностика: список Ozon — ${d.diagnostics.product_count??'н/д'}, склады — ${d.diagnostics.warehouse_count??'н/д'}, остатки — ${d.diagnostics.stock_count??'н/д'}.`:' Worker не передал диагностические данные.';throw new Error('Worker ответил, но каталог товаров пуст.'+diag+' Это не ошибка распознавания на iPhone.');}if(!warehouses.length)throw new Error('Ozon не вернул склады FBS.');const fbs=warehouses.filter(w=>!w.is_rfbs);const choices=fbs.length?fbs:warehouses;if(!warehouseId||!choices.some(w=>String(w.warehouse_id)===String(warehouseId)))warehouseId=String(choices[0].warehouse_id);$('warehouseSelect').innerHTML=choices.map(w=>`<option value="${w.warehouse_id}">${esc(w.name)} · ID ${w.warehouse_id}</option>`).join('');$('warehouseSelect').value=warehouseId;$('warehouseWrap').classList.toggle('hidden',choices.length<2);$('catalogTag').textContent=products.length+' товаров';$('catalogInfo').textContent=`Получено ${products.length} товаров за ${(clientMs/1000).toFixed(1)} с. Кэш Worker: ${d.diagnostics?.cache||'нет данных'}. Этапы Ozon: склады ${d.diagnostics?.stages?.warehouses_ms??'—'} мс, товары ${d.diagnostics?.stages?.products_ms??'—'} мс, остатки ${d.diagnostics?.stages?.stocks_ms??'—'} мс. Склад: ${selectedWarehouse()?.name||warehouseId}.`;localStorage.setItem(CATALOG_CACHE,JSON.stringify({at:Date.now(),products,warehouses,warehouseId}));if(!countedSet.size){counts=new Map();countedSet=new Set();}stats();persist();setStatus('Каталог загружен');$('app').classList.remove('hidden');}catch(e){$('catalogInfo').textContent='Ошибка загрузки: '+e.message;setStatus('Ошибка API');}finally{$('loadCatalog').disabled=false;}}
-async function startCamera(){scanPaused=!!current;if(!navigator.mediaDevices?.getUserMedia){$('ocrInfo').textContent='Камера недоступна. Открой сайт по HTTPS или введи артикул вручную.';return;}try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080},focusMode:{ideal:'continuous'}},audio:false});$('video').srcObject=stream;await $('video').play();$('video').classList.remove('hidden');$('placeholder').classList.add('hidden');$('frame').classList.remove('hidden');$('cameraBtn').textContent='Выключить камеру';const track=stream.getVideoTracks()[0],caps=track.getCapabilities?track.getCapabilities():{};nativeZoom=(caps.zoom&&Number.isFinite(caps.zoom.min)&&Number.isFinite(caps.zoom.max))?track:null;nativeZoomMin=nativeZoom?caps.zoom.min:1;nativeZoomMax=nativeZoom?caps.zoom.max:1;const range=$('zoomRange');range.disabled=false;range.min='1';range.max=String(Math.max(1,Math.min(4,nativeZoom?nativeZoomMax:4)));range.value='1';digitalZoom=1;$('video').style.setProperty('--camera-zoom','1');$('zoomValue').textContent='1.0×';$('zoomInfo').textContent=nativeZoom?'Доступен зум камеры iPhone.':'Цифровое увеличение: изображение приблизится программно.';await setCameraZoom(1);$('ocrInfo').textContent='Сканирование включено. Покажи этикетку целиком: название, артикул и последнее слово с цветом.';scheduleScan(500);}catch(e){$('ocrInfo').textContent='Не удалось включить камеру: '+e.message;}}
-async function setCameraZoom(value){const z=Math.max(1,Math.min(4,Number(value)||1));digitalZoom=z;$('zoomValue').textContent=z.toFixed(1)+'×';if(nativeZoom){const applied=Math.max(nativeZoomMin,Math.min(nativeZoomMax,nativeZoomMin+(z-1)*(nativeZoomMax-nativeZoomMin)/3));try{await nativeZoom.applyConstraints({advanced:[{zoom:applied}]});$('video').style.setProperty('--camera-zoom','1');$('zoomInfo').textContent='Используется аппаратный зум камеры.';return;}catch(e){nativeZoom=null;}}$('video').style.setProperty('--camera-zoom',String(z));$('zoomInfo').textContent='Используется цифровой зум. Для чёткости поднеси телефон так, чтобы цифры были резкими.';}
-function stopCamera(){clearTimeout(scanTimer);scanTimer=null;scanPaused=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}$('video').srcObject=null;$('video').classList.add('hidden');$('placeholder').classList.remove('hidden');$('frame').classList.add('hidden');$('cameraBtn').textContent='Включить камеру';$('zoomRange').disabled=true;$('zoomInfo').textContent='Увеличение станет доступно после включения камеры.';nativeZoom=null;$('ocrInfo').textContent='Камера выключена.';}
-function scheduleScan(delay=850){clearTimeout(scanTimer);scanTimer=null;if(stream&&!current&&!scanPaused)scanTimer=setTimeout(()=>{scanTimer=null;recognize(true);},delay);}
-function normalizeOcr(s){return String(s||'').toUpperCase().replace(/[ОOQ]/g,'0').replace(/[З]/g,'3').replace(/[IL|]/g,'1').replace(/[Б]/g,'6').replace(/[Ｓ]/g,'5').replace(/[^A-ZА-ЯЁ0-9-]/g,'');}
-function tokenOcr(s){return String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[^а-я]+/gi,' ').trim().split(/\s+/).filter(x=>x.length>=2);}
-function wordHit(a,b){if(!a||!b)return false;if(a===b)return true;if(a.length>=4&&b.length>=4){let d=0;for(let i=0,j=0;i<a.length&&j<b.length;){if(a[i]===b[j]){i++;j++;}else{d++;if(d>1)return false;if(a.length>=b.length)i++;else j++;}}return d+(a.length-i)+(b.length-j)<=1;}return false;}
-function articleSuffixes(text){
- const raw=String(text||'').toUpperCase().replace(/[ОOQ]/g,'0').replace(/[З]/g,'3').replace(/[IL|]/g,'1').replace(/[Б]/g,'6');
- const out=new Set();
- // Ищем только изменяемую часть артикула после постоянного префикса 21242.
- for(const m of raw.matchAll(/21242[\s-]*([0-9]{1,5})(?:[\s-]+([0-9]{1,5}))?/g)){
-  const suffix=(m[1]||'')+(m[2]||'');if(suffix.length>=1&&suffix.length<=10)out.add(suffix);
- }
- return [...out];
-}
-function productArticleSuffix(offerId){const m=String(offerId||'').match(/^21242[\s-]*([0-9]+)(?:[\s-]+([0-9]+))?/i);return m?(m[1]||'')+(m[2]||''):'';}
-function analyzeLabel(text){
- const raw=String(text||'');const suffixes=articleSuffixes(raw);
- // Название начинается первым словом этикетки; цвет — последнее текстовое слово.
- const labelWords=tokenOcr(raw).filter(w=>!/^\d+$/.test(w));
- const firstWord=labelWords[0]||'';const lastWord=labelWords[labelWords.length-1]||'';
- const stop=new Set(['для','или','шт','комплект','набор','товар','новый','новая','новое','пластик']);
- const ranked=products.map(p=>{
-  const idSuffix=productArticleSuffix(p.offer_id);const articleExact=!!idSuffix&&suffixes.includes(idSuffix);
-  const nameWords=tokenOcr(p.name||'');const productFirst=nameWords[0]||'';const productColor=nameWords[nameWords.length-1]||'';
-  const firstMatch=!!(firstWord&&productFirst&&wordHit(firstWord,productFirst));
-  const colorMatch=!!(lastWord&&productColor&&wordHit(lastWord,productColor));
-  const middle=nameWords.slice(1,-1).filter(w=>!stop.has(w));
-  const labelMiddle=labelWords.slice(1,-1);
-  const matched=[...new Set(middle.filter(n=>labelMiddle.some(w=>wordHit(n,w))))];
-  const score=(articleExact?100:0)+(firstMatch?35:0)+(colorMatch?35:0)+Math.min(matched.length,2)*12;
-  return {product:p,articleExact,wordMatches:matched.length,matched,colorMatch,firstMatch,score,productFirst,productColor};
- }).filter(x=>x.firstMatch||x.colorMatch||x.articleExact).sort((a,b)=>b.score-a.score);
- // Автоподтверждение требует всех четырёх условий: артикул после 21242,
- // первое слово, цвет в конце и хотя бы одно дополнительное слово названия.
- const strict=ranked.find(x=>x.articleExact&&x.firstMatch&&x.colorMatch&&x.wordMatches>=1);
- return {strict,ranked:ranked.slice(0,5),suffixes,labelWords,firstWord,lastWord};
-}
-async function ensureOcr(){if(ocrWorker)return;$('ocrInfo').textContent='Загружаю русскую модель распознавания…';ocrWorker=await Tesseract.createWorker('rus',1,{logger:m=>{if(m.status==='recognizing text')$('ocrInfo').textContent=`Читаю русскую этикетку… ${Math.round((m.progress||0)*100)}%`;}});await ocrWorker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1',user_defined_dpi:'250'});}
-function makeFullLabelCanvas(video,mode='gray'){
- const c=$('canvas'),ctx=c.getContext('2d',{willReadFrequently:true}),vw=video.videoWidth,vh=video.videoHeight;const cam=$('video').parentElement.getBoundingClientRect();const scale=Math.max(cam.width/vw,cam.height/vh),z=nativeZoom?1:digitalZoom;const sw=Math.min(vw,cam.width/(scale*z)),sh=Math.min(vh,cam.height/(scale*z)),sx=(vw-sw)/2,sy=(vh-sh)/2;const targetW=Math.min(1600,Math.max(1100,Math.round(sw)));c.width=targetW;c.height=Math.round(targetW*sh/sw);
- ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(video,sx,sy,sw,sh,0,0,c.width,c.height);
- const im=ctx.getImageData(0,0,c.width,c.height),d=im.data;let min=255,max=0;
- for(let i=0;i<d.length;i+=4){const g=Math.round(.299*d[i]+.587*d[i+1]+.114*d[i+2]);if(g<min)min=g;if(g>max)max=g;d[i]=d[i+1]=d[i+2]=g;d[i+3]=255;}
- const span=Math.max(40,max-min);for(let i=0;i<d.length;i+=4){let g=(d[i]-min)*255/span;if(mode==='contrast')g=Math.max(0,Math.min(255,(g-115)*1.65+128));d[i]=d[i+1]=d[i+2]=g;}
- ctx.putImageData(im,0,0);return c;
-}
-function showOcrCandidates(items){const box=$('ocrDebug');if(!items.length)return;const rows=items.map(x=>`<div class="item" data-ocr-id="${esc(x.product.offer_id)}"><div><b>${esc(x.product.offer_id)}</b><small>${esc(x.product.name)} · слов совпало: ${x.wordMatches}${x.colorMatch?' · цвет совпал':''}${x.articleExact?' · артикул найден':''}</small></div><span class="tag">Проверить</span></div>`).join('');box.innerHTML=`<div style="font-weight:700;margin-bottom:5px">Возможные совпадения — нажми нужный товар:</div>${rows}`;box.querySelectorAll('[data-ocr-id]').forEach(el=>el.addEventListener('click',()=>lookup(el.dataset.ocrId)));}
-async function recognize(auto=false){if(!stream||current||scanPaused)return;if(busy){if(auto)scheduleScan(700);return;}const v=$('video');if(v.readyState<2){if(auto)scheduleScan(800);return;}busy=true;try{await ensureOcr();let best=null,bestText='';const outputs=[];
- // Основной быстрый проход. Второй, более чувствительный, запускаем только если первый не дал строгого совпадения.
- for(const [mode,psm] of [['gray',6],['contrast',11]]){await ocrWorker.setParameters({tessedit_pageseg_mode:String(psm),preserve_interword_spaces:'1',user_defined_dpi:'250'});const out=await ocrWorker.recognize(makeFullLabelCanvas(v,mode));const raw=String(out.data.text||'').trim();if(raw)outputs.push(raw);const a=analyzeLabel(raw);if(!best||((a.strict?10000:0)+(a.ranked[0]?.score||0))>((best.strict?10000:0)+(best.ranked[0]?.score||0))){best=a;bestText=raw;}if(a.strict)break;}
- if(best?.strict){const x=best.strict;$('ocrDebug').textContent=`Артикул: ${x.product.offer_id}\nНазвание: ${x.product.name}\nПервое слово: ${best.firstWord} ✓\nДополнительные слова: ${x.matched.join(', ')} ✓\nЦвет в конце: ${best.lastWord} ✓\nОкончание артикула после 21242: ${articleSuffixes(bestText).join(', ')} ✓`;$('ocrInfo').textContent='Совпали артикул, начало названия, дополнительные слова и цвет. Проверь товар и нажми +1.';lookup(x.product.offer_id);}
- else if(best?.ranked?.length){$('ocrInfo').textContent='Есть похожие товары. Для автоматического выбора должны совпасть артикул после 21242, первое слово, цвет и хотя бы одно дополнительное слово.';showOcrCandidates(best.ranked);}
- else{$('ocrDebug').textContent=outputs.length?('Текст всей этикетки:\n'+outputs[0].slice(0,900)):'Камера пока не прочитала текст. Поднеси этикетку ближе, чтобы она занимала большую часть кадра.';$('ocrInfo').textContent='Не удалось прочитать достаточно данных. Покажи этикетку целиком и поднеси её ближе.';}
- }catch(e){$('ocrInfo').textContent='Ошибка распознавания: '+e.message;}finally{await ocrWorker?.setParameters({tessedit_pageseg_mode:'6'}).catch(()=>{});busy=false;if(stream&&!current&&!scanPaused)scheduleScan(1300);}}
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><div class="logo">＋</div><div><h1>Мой склад</h1><p>Пересчёт остатков для Ozon</p></div></div>
+    <div class="pill" id="statusPill">Файл не загружен</div>
+  </header>
 
-function openReview(){if(!products.length){alert('Сначала загрузи товары из Ozon.');return;}const missing=products.filter(p=>!countedSet.has(p.offer_id));if(!zeroSelectionInitialized){zeroSelected=new Set(missing.map(p=>p.offer_id));zeroSelectionInitialized=true;}renderReview();$('review').classList.remove('hidden');$('review').scrollIntoView({behavior:'smooth',block:'start'});persist();}
-function renderReview(){const missing=products.filter(p=>!countedSet.has(p.offer_id));const counted=products.filter(p=>countedSet.has(p.offer_id));$('reviewCounted').textContent=counted.length;$('reviewZero').textContent=zeroSelected.size;$('reviewSkip').textContent=missing.length-zeroSelected.size;$('missingList').innerHTML=missing.length?missing.map(p=>{const st=(p.warehouse_stocks||{})[String(warehouseId)]||{present:0,reserved:0};return `<label class="checkrow"><input type="checkbox" data-zero="${esc(p.offer_id)}" ${zeroSelected.has(p.offer_id)?'checked':''}><span style="flex:1"><b>${esc(p.offer_id)}</b><small>${esc(p.name)}</small><small>Сейчас Ozon: ${st.present} · резерв: ${st.reserved} · новое: ${zeroSelected.has(p.offer_id)?'0':'без изменений'}</small></span><span class="tag warn">Не сканирован</span></label>`;}).join(''):'<div class="small">Все товары пересчитаны.</div>';$('countedList').innerHTML=counted.length?counted.map(p=>`<div class="item"><div><b>${esc(p.offer_id)}</b><small>${esc(p.name)}</small></div><span class="tag good">${counts.get(p.offer_id)||0} шт.</span></div>`).join(''):'<div class="small">Нет пересчитанных товаров.</div>';$('missingList').querySelectorAll('[data-zero]').forEach(el=>el.addEventListener('change',()=>{el.checked?zeroSelected.add(el.dataset.zero):zeroSelected.delete(el.dataset.zero);renderReview();persist();}));}
-async function send(){const chosen=products.filter(p=>countedSet.has(p.offer_id)||zeroSelected.has(p.offer_id));if(!chosen.length){alert('Нет товаров для отправки.');return;}const skipped=products.length-chosen.length;const zeros=chosen.filter(p=>!countedSet.has(p.offer_id)).length;const message=`Отправить остатки в Ozon?\n\nСклад: ${selectedWarehouse()?.name||warehouseId}\nТоваров к обновлению: ${chosen.length}\nНепросканированных с остатком 0: ${zeros}\nПропущенных без изменений: ${skipped}\n\nЭто действие изменит остатки в кабинете Ozon. Отменить отправку после применения нельзя.`;if(!confirm(message))return;$('sendBtn').disabled=true;$('sendResult').textContent='Отправляю остатки в Ozon. Не закрывай страницу…';try{const payload={warehouse_id:Number(warehouseId),items:chosen.map(p=>({offer_id:p.offer_id,product_id:p.product_id,sku:p.sku,quantity:countedSet.has(p.offer_id)?(counts.get(p.offer_id)||0):0}))};const d=await api('/api/stocks/update','POST',payload);const failed=d.results.filter(r=>!r.updated);const warnings=d.results.filter(r=>r.reserved_exceeds_count);let msg=`Ozon подтвердил обновление: ${d.updated} из ${d.total}. Ошибок: ${d.failed}.`;if(warnings.length)msg+=` Внимание: у ${warnings.length} товаров резерв больше пересчитанного количества; доступный остаток отправлен как 0, резерв останется.`;if(failed.length)msg+='\nОшибки:\n'+failed.slice(0,12).map(r=>`${r.offer_id}: ${(r.errors||[]).join(', ')}`).join('\n');$('sendResult').textContent=msg;setStatus(d.failed?'Есть ошибки':'Остатки отправлены');}catch(e){$('sendResult').textContent='Ошибка отправки: '+e.message;setStatus('Ошибка отправки');}finally{$('sendBtn').disabled=false;}}
-function download(name,data){const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
-$('saveConfig').onclick=saveConfig;$('testConnection').onclick=testConnection;$('editConfig').onclick=expandConfig;$('testConnectionCompact').onclick=testConnection;$('loadCatalog').onclick=loadCatalog;$('warehouseSelect').onchange=()=>{warehouseId=$('warehouseSelect').value;persist();};$('cameraBtn').onclick=()=>stream?stopCamera():startCamera();$('zoomRange').oninput=e=>{setCameraZoom(e.target.value);};$('plus').onclick=addOne;$('find').onclick=()=>lookup($('manual').value);$('manual').onkeydown=e=>{if(e.key==='Enter')lookup(e.target.value);};$('search').oninput=renderSearch;$('reviewBtn').onclick=openReview;$('selectAllZero').onclick=()=>{zeroSelected=new Set(products.filter(p=>!countedSet.has(p.offer_id)).map(p=>p.offer_id));zeroSelectionInitialized=true;renderReview();persist();};$('clearZero').onclick=()=>{zeroSelected.clear();zeroSelectionInitialized=true;renderReview();persist();};$('sendBtn').onclick=send;$('backup').onclick=()=>download('ozon-inventory-api-backup.json',{version:2,products,warehouses,warehouseId,counts:[...counts],counted:[...countedSet],zeroSelected:[...zeroSelected],zeroSelectionInitialized,recent});$('reset').onclick=()=>{if(!confirm('Начать новый пересчёт? Все текущие количества будут сброшены. Каталог Ozon останется загруженным.'))return;counts=new Map();countedSet=new Set();zeroSelected=new Set();zeroSelectionInitialized=false;recent=[];current=null;$('match').classList.add('hidden');$('review').classList.add('hidden');$('sendResult').textContent='';stats();persist();$('ocrInfo').textContent='Новый пересчёт начат с нуля.';};
-$('restore').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(d.version!==2||!Array.isArray(d.products))throw new Error('Неподходящий формат копии');products=d.products;warehouses=d.warehouses||[];warehouseId=String(d.warehouseId||'');counts=new Map(d.counts||[]);countedSet=new Set(d.counted||[]);zeroSelected=new Set(d.zeroSelected||[]);zeroSelectionInitialized=!!d.zeroSelectionInitialized;recent=d.recent||[];$('app').classList.remove('hidden');stats();persist();alert('Копия восстановлена. При необходимости заново загрузи актуальный каталог Ozon.');}catch(err){alert('Не удалось восстановить: '+err.message);}finally{e.target.value='';}};
-try{const c=JSON.parse(localStorage.getItem(CONFIG)||'{}');workerUrl=c.workerUrl||'';appToken=c.appToken||'';$('workerUrl').value=workerUrl;$('appToken').value=appToken;if(workerUrl&&appToken){collapseConfig();$('connectionInfo').textContent='Настройки подключения сохранены на этом устройстве.';}const d=JSON.parse(localStorage.getItem(STORE)||'null');if(d&&Array.isArray(d.products)){products=d.products;warehouses=d.warehouses||[];warehouseId=String(d.warehouseId||'');counts=new Map(d.counts||[]);countedSet=new Set(d.counted||[]);zeroSelected=new Set(d.zeroSelected||[]);zeroSelectionInitialized=!!d.zeroSelectionInitialized;recent=d.recent||[];$('app').classList.remove('hidden');$('catalogTag').textContent=products.length+' товаров (сохранено)';$('catalogInfo').textContent='Восстановлен сохранённый каталог. Перед новой инвентаризацией обнови данные из Ozon.';if(warehouses.length){const choices=warehouses.filter(w=>!w.is_rfbs);$('warehouseSelect').innerHTML=choices.map(w=>`<option value="${w.warehouse_id}">${esc(w.name)}</option>`).join('');$('warehouseSelect').value=warehouseId;$('warehouseWrap').classList.toggle('hidden',choices.length<2);}stats();}}catch(e){}
-try{if(!products.length){const cc=JSON.parse(localStorage.getItem(CATALOG_CACHE)||'null');if(cc&&Array.isArray(cc.products)&&Date.now()-cc.at<10*60*1000){products=cc.products;warehouses=cc.warehouses||[];warehouseId=String(cc.warehouseId||'');$('app').classList.remove('hidden');$('catalogTag').textContent=products.length+' товаров (кэш)';$('catalogInfo').textContent='Показан сохранённый каталог. Для актуализации нажми «Загрузить товары из Ozon».';stats();}}}catch(e){}
-window.addEventListener('beforeunload',()=>{if(stream)stopCamera();});
+  <section class="upload" id="uploadSection">
+    <div style="font-size:30px">▤</div>
+    <strong>Загрузи выгрузку остатков Ozon</strong>
+    <p>Поддерживается исходный CSV-файл Ozon с разделителем «;»</p>
+    <label class="btn primary" for="csvFile">Выбрать CSV-файл</label>
+    <input id="csvFile" type="file" accept=".csv,text/csv" hidden>
+    <div class="file-name" id="fileName"></div>
+  </section>
+
+  <main id="app" class="hidden">
+    <section class="panel">
+      <div class="stats">
+        <div class="stat"><b id="totalCount">0</b><span>товаров всего</span></div>
+        <div class="stat"><b id="countedCount">0</b><span>уже пересчитано</span></div>
+        <div class="stat"><b id="piecesCount">0</b><span>штук насчитано</span></div>
+      </div>
+      <div class="progress"><i id="progressBar"></i></div>
+      <div class="small" id="progressText">Пересчитано 0 из 0 товаров</div>
+    </section>
+
+    <section class="panel" id="scanPanel">
+      <h2>1. Сканирование этикетки</h2>
+      <div class="camera" id="cameraBox">
+        <video id="video" autoplay playsinline muted class="hidden"></video>
+        <div class="placeholder" id="cameraPlaceholder"><div style="font-size:38px">▣</div><b>Камера ещё не включена</b><div class="small" style="margin-top:6px">Нажми «Включить камеру» и наведи её на артикул</div></div>
+        <div class="frame hidden" id="scanFrame"></div>
+        <div class="camtag" id="cameraTag"></div>
+      </div>
+      <div class="btnrow" style="margin-top:12px">
+        <button class="btn secondary" id="cameraBtn">Включить камеру</button>
+        <button class="btn primary" id="recognizeBtn" disabled>Распознать артикул</button>
+      </div>
+      <div class="small" id="ocrStatus" style="margin-top:9px">Для работы камеры открой сайт по HTTPS и разреши доступ к камере.</div>
+      <div style="margin-top:17px">
+        <label class="small" for="manualArticle">Или введи артикул вручную</label>
+        <div class="btnrow" style="margin-top:6px;flex-wrap:nowrap"><input class="field" id="manualArticle" placeholder="Например, 21242-4-1" autocomplete="off"><button class="btn secondary" id="findBtn">Найти</button></div>
+      </div>
+      <div id="matchBox" class="found hidden">
+        <div class="small" style="color:#9bd9bd">ТОВАР НАЙДЕН</div>
+        <div class="article" id="matchArticle"></div>
+        <div class="name" id="matchName"></div>
+        <div class="qty"><span>Пересчитано сейчас</span><b id="matchQty">0</b></div>
+        <button class="btn success wide" id="plusBtn" style="font-size:19px;padding:16px">＋ 1 — добавить штуку</button>
+        <div class="small" style="text-align:center;margin-top:8px">После нажатия камера будет готова к следующей этикетке</div>
+      </div>
+      <div id="notFound" class="notice error hidden"></div>
+    </section>
+
+    <section class="panel">
+      <h2>2. Найти товар в списке</h2>
+      <input class="field" id="searchInput" placeholder="Поиск по артикулу или названию…" autocomplete="off">
+      <div class="result-list" id="searchResults"></div>
+    </section>
+
+    <section class="panel">
+      <h2>3. Последние пересчитанные</h2>
+      <div class="recent" id="recentList"><div class="small">Пока ничего не отсканировано</div></div>
+    </section>
+
+    <section class="panel">
+      <h2>4. Завершение и выгрузка</h2>
+      <p class="small">При завершении всем товарам, которые не встретились при пересчёте, будет установлен остаток 0. У пересчитанных товаров останется фактически набранное количество.</p>
+      <button class="btn success wide" id="finishBtn">Завершить пересчёт и скачать CSV</button>
+      <button class="btn secondary wide" id="saveProgressBtn" style="margin-top:9px">Сохранить прогресс на этом устройстве</button>
+      <div class="btnrow" style="margin-top:9px"><button class="btn secondary" id="backupBtn">Скачать резервную копию</button><label class="btn secondary" for="restoreFile">Восстановить копию</label><input id="restoreFile" type="file" accept=".json,application/json" hidden></div>
+      <div class="small" id="saveInfo" style="margin-top:8px">Прогресс автоматически сохраняется в браузере этого устройства. Для переноса на другое устройство скачай резервную копию.</div>
+      <button class="btn danger wide" id="resetBtn" style="margin-top:12px">Начать пересчёт заново</button>
+    </section>
+  </main>
+  <div class="foot">Данные остаются в браузере устройства. Исходный файл Ozon не изменяется.</div>
+</div>
+<canvas id="captureCanvas" class="hidden"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const STORE_KEY = 'ozonInventorySession_v1';
+  let headers=[], rows=[], articleIndex=-1, availableIndex=-1, current=null, stream=null, worker=null, busy=false, fileBase='ozon_inventory';
+  let articleMap=new Map(), counts=new Map(), countedSet=new Set(), recent=[];
+  const norm = s => String(s ?? '').trim().replace(/\s+/g,'').toUpperCase();
+  const esc = s => String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function setStatus(t){$('statusPill').textContent=t;}
+  function updateStats(){
+    const total=rows.length, counted=countedSet.size, pieces=[...counts.values()].reduce((a,b)=>a+b,0);
+    $('totalCount').textContent=total; $('countedCount').textContent=counted; $('piecesCount').textContent=pieces;
+    $('progressBar').style.width=(total?counted/total*100:0)+'%'; $('progressText').textContent=`Пересчитано ${counted} из ${total} товаров`;
+    $('recentList').innerHTML=recent.length?recent.slice(0,25).map(x=>`<div class="recent-row"><div><b style="color:var(--text)">${esc(x.article)}</b><small>${esc(x.name)}</small></div><b>× ${x.qty}</b></div>`).join(''):'<div class="small">Пока ничего не отсканировано</div>';
+  }
+  function persist(){
+    if(!rows.length)return;
+    try{localStorage.setItem(STORE_KEY,JSON.stringify({fileBase,headers,rows,articleIndex,availableIndex,counts:[...counts],counted:[...countedSet],recent}));$('saveInfo').textContent='Прогресс сохранён в браузере этого устройства.';}catch(e){$('saveInfo').textContent='Не удалось сохранить прогресс автоматически. Скачай промежуточный файл или не очищай данные браузера.';}
+  }
+  function showMatch(rowIndex){
+    current=rowIndex; const article=String(rows[rowIndex][articleIndex]??'').trim();
+    $('matchArticle').textContent=article; $('matchName').textContent=rows[rowIndex][nameIndex()]||'Название не указано';
+    $('matchQty').textContent=counts.get(article)||0; $('matchBox').classList.remove('hidden'); $('notFound').classList.add('hidden');
+    $('manualArticle').value=article;
+    $('matchBox').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  function nameIndex(){return headers.findIndex(h=>/название товара/i.test(h));}
+  function findArticle(raw){
+    const key=norm(raw); if(!key)return -1;
+    if(articleMap.has(key))return articleMap.get(key);
+    return -1;
+  }
+  function lookup(raw){
+    const idx=findArticle(raw);
+    if(idx<0){$('matchBox').classList.add('hidden');$('notFound').textContent=`Артикул «${raw}» не найден в загруженном файле. Проверь распознавание или введи артикул вручную.`;$('notFound').classList.remove('hidden');return;}
+    showMatch(idx);
+  }
+  function addOne(){
+    if(current===null)return;
+    const article=String(rows[current][articleIndex]??'').trim();
+    const next=(counts.get(article)||0)+1; counts.set(article,next); countedSet.add(article);
+    recent.unshift({article,name:rows[current][nameIndex()]||'',qty:next});
+    $('matchQty').textContent=next; updateStats(); persist();
+    current=null; $('matchBox').classList.add('hidden'); $('notFound').classList.add('hidden'); $('manualArticle').value=''; $('ocrStatus').textContent=`Добавлено: ${article} — ${next} шт. Можно сканировать следующий товар.`;
+    if(stream) $('recognizeBtn').focus();
+  }
+  async function startCamera(){
+    if(!navigator.mediaDevices?.getUserMedia){$('ocrStatus').textContent='Камера недоступна. Открой сайт по HTTPS в современном браузере или используй ручной ввод.';return;}
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
+      $('video').srcObject=stream; $('video').classList.remove('hidden'); $('cameraPlaceholder').classList.add('hidden'); $('scanFrame').classList.remove('hidden');
+      $('cameraBtn').textContent='Выключить камеру'; $('recognizeBtn').disabled=false; $('ocrStatus').textContent='Наведи камеру так, чтобы артикул целиком находился в рамке, затем нажми «Распознать артикул».';
+    }catch(e){$('ocrStatus').textContent='Не удалось включить камеру: '+(e.message||e)+' . Проверь разрешение на использование камеры.';}
+  }
+  function stopCamera(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;} $('video').srcObject=null;$('video').classList.add('hidden');$('cameraPlaceholder').classList.remove('hidden');$('scanFrame').classList.add('hidden');$('cameraBtn').textContent='Включить камеру';$('recognizeBtn').disabled=true;}
+  async function recognize(){
+    if(!stream||busy)return;
+    const video=$('video'); if(video.readyState<2){$('ocrStatus').textContent='Камера ещё загружается. Подожди секунду.';return;}
+    busy=true;$('recognizeBtn').disabled=true;$('ocrStatus').textContent='Распознаю цифры на этикетке…';
+    try{
+      if(!worker){$('ocrStatus').textContent='Загружаю модуль распознавания при первом запуске…';worker=await Tesseract.createWorker('eng',1,{logger:m=>{if(m.status==='recognizing text')$('ocrStatus').textContent=`Распознавание… ${Math.round((m.progress||0)*100)}%`;}});await worker.setParameters({tessedit_char_whitelist:'0123456789-',tessedit_pageseg_mode:'6'});}
+      const canvas=$('captureCanvas'),ctx=canvas.getContext('2d');
+      const vw=video.videoWidth,vh=video.videoHeight; const cropW=Math.round(vw*.86),cropH=Math.round(vh*.55),sx=Math.round((vw-cropW)/2),sy=Math.round((vh-cropH)/2);
+      canvas.width=cropW*2;canvas.height=cropH*2;ctx.drawImage(video,sx,sy,cropW,cropH,0,0,canvas.width,canvas.height);
+      const result=await worker.recognize(canvas);const text=result.data.text||'';
+      const candidates=text.match(/[0-9][0-9\-\s]{3,}[0-9]/g)||[];
+      let found=-1,recognized='';
+      for(const c of candidates){const cleaned=c.replace(/\s/g,'').replace(/--+/g,'-').replace(/^-|-$/g,'');const idx=findArticle(cleaned);if(idx>=0){found=idx;recognized=cleaned;break;}}
+      if(found<0){
+        // Try OCR text as one token and common OCR confusions; always require an exact match to a loaded SKU.
+        const compact=text.replace(/\s/g,'');const variants=[compact,compact.replace(/[OQ]/g,'0').replace(/[Il|]/g,'1').replace(/[Ss]/g,'5').replace(/[Б]/g,'6')];
+        for(const v of variants){const m=v.match(/[0-9]{4,}-[0-9]{1,}-[0-9]{1,}/);if(m){const idx=findArticle(m[0]);if(idx>=0){found=idx;recognized=m[0];break;}}}
+      }
+      if(found>=0){$('ocrStatus').textContent='Распознано: '+recognized;showMatch(found);}else{$('ocrStatus').textContent='Не удалось точно сопоставить артикул. Попробуй приблизить этикетку, изменить угол или введи артикул вручную.';$('manualArticle').focus();}
+    }catch(e){$('ocrStatus').textContent='Ошибка распознавания: '+(e.message||e)+'. Проверь подключение к интернету.';}
+    finally{busy=false;$('recognizeBtn').disabled=!stream;}
+  }
+  function renderSearch(){
+    const q=norm($('searchInput').value);if(!q){$('searchResults').innerHTML='';return;}
+    const hits=[];for(let i=0;i<rows.length&&hits.length<30;i++){const a=String(rows[i][articleIndex]??'');const n=String(rows[i][nameIndex()]??'');if(norm(a).includes(q)||norm(n).includes(q))hits.push({i,a,n});}
+    $('searchResults').innerHTML=hits.length?hits.map(x=>`<div class="result-item" data-index="${x.i}"><div><b>${esc(x.a)}</b><small>${esc(x.n)}</small></div><div style="text-align:right"><b>${counts.get(x.a)||0}</b><small>шт.</small></div></div>`).join(''):'<div class="small" style="padding:12px">Ничего не найдено</div>';
+    $('searchResults').querySelectorAll('[data-index]').forEach(el=>el.addEventListener('click',()=>showMatch(Number(el.dataset.index))));
+  }
+  function exportCsv(){
+    const out=rows.map(row=>{const copy=[...row];const article=String(copy[articleIndex]??'').trim();copy[availableIndex]=String(counts.get(article)||0);return copy;});
+    const csv='\uFEFF'+Papa.unparse({fields:headers,data:out},{delimiter:';',quotes:true,quoteChar:'"',escapeChar:'"',newline:'\r\n'});
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fileBase.replace(/\.csv$/i,'')+'_пересчитано.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  }
+  function finish(){
+    const missing=rows.length-countedSet.size;
+    const msg=`Завершить пересчёт?\n\nВсего товаров: ${rows.length}\nПересчитано: ${countedSet.size}\nНе сканировались: ${missing}\n\nУ всех ${missing} непросканированных товаров остаток будет установлен в 0. Старые остатки Ozon будут заменены фактическим пересчётом.`;
+    if(!confirm(msg))return;exportCsv();$('ocrStatus').textContent='Файл сформирован. Проверь его перед загрузкой в кабинет Ozon.';
+  }
+  function loadFile(file){
+    if(!file)return;
+    fileBase=file.name;
+    Papa.parse(file,{header:true,skipEmptyLines:'greedy',delimiter:';',complete:res=>{
+      if(res.errors.length&&res.data.length===0){alert('Не удалось прочитать CSV. Проверь, что это исходная выгрузка остатков Ozon.');return;}
+      headers=res.meta.fields||[];rows=res.data.map(r=>headers.map(h=>r[h]??''));
+      articleIndex=headers.findIndex(h=>/^артикул$/i.test(h.trim()));availableIndex=headers.findIndex(h=>/доступно на моих складах/i.test(h));
+      if(articleIndex<0||availableIndex<0){alert('В файле не найдены обязательные столбцы «Артикул» и «Доступно на моих складах, шт». Загрузи исходную выгрузку остатков Ozon.');return;}
+      articleMap=new Map();for(let i=0;i<rows.length;i++){const a=norm(rows[i][articleIndex]);if(a){if(articleMap.has(a)){alert('В файле обнаружены повторяющиеся артикулы: '+a+'. Для безопасного пересчёта исправь выгрузку.');return;}articleMap.set(a,i);}}
+      counts=new Map();countedSet=new Set();recent=[];current=null;
+      $('uploadSection').classList.add('hidden');$('app').classList.remove('hidden');$('fileName').textContent=file.name;setStatus('Загружено '+rows.length+' товаров');updateStats();persist();
+    },error:e=>alert('Ошибка чтения файла: '+e.message)});
+  }
+  $('csvFile').addEventListener('change',e=>loadFile(e.target.files[0]));
+  $('cameraBtn').addEventListener('click',()=>stream?stopCamera():startCamera());$('recognizeBtn').addEventListener('click',recognize);$('plusBtn').addEventListener('click',addOne);
+  $('findBtn').addEventListener('click',()=>lookup($('manualArticle').value));$('manualArticle').addEventListener('keydown',e=>{if(e.key==='Enter')lookup(e.target.value);});
+  $('searchInput').addEventListener('input',renderSearch);$('finishBtn').addEventListener('click',finish);$('saveProgressBtn').addEventListener('click',()=>{persist();alert('Прогресс сохранён в браузере этого устройства.');});
+  $('backupBtn').addEventListener('click',()=>{
+    const data={version:1,fileBase,headers,rows,articleIndex,availableIndex,counts:[...counts],counted:[...countedSet],recent};
+    const blob=new Blob([JSON.stringify(data)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='ozon-inventory-progress.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  });
+  $('restoreFile').addEventListener('change',async e=>{
+    const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(d.version!==1||!Array.isArray(d.rows)||!Array.isArray(d.headers)||d.articleIndex<0||d.availableIndex<0)throw new Error('Неверный формат резервной копии');
+      if(!confirm('Восстановить резервную копию? Текущий пересчёт на этом устройстве будет заменён.'))return;
+      fileBase=d.fileBase||'ozon_inventory';headers=d.headers;rows=d.rows;articleIndex=d.articleIndex;availableIndex=d.availableIndex;counts=new Map(d.counts||[]);countedSet=new Set(d.counted||[]);recent=d.recent||[];articleMap=new Map(rows.map((r,i)=>[norm(r[articleIndex]),i]));current=null;
+      $('uploadSection').classList.add('hidden');$('app').classList.remove('hidden');setStatus('Восстановлена копия');updateStats();persist();$('matchBox').classList.add('hidden');alert('Резервная копия восстановлена. Можно продолжать пересчёт.');
+    }catch(err){alert('Не удалось восстановить копию: '+err.message);}finally{e.target.value='';}
+  });
+  $('resetBtn').addEventListener('click',()=>{if(!confirm('Начать пересчёт заново? Все набранные количества на этом устройстве будут сброшены.'))return;counts=new Map();countedSet=new Set();recent=[];current=null;persist();updateStats();$('matchBox').classList.add('hidden');$('notFound').classList.add('hidden');$('ocrStatus').textContent='Пересчёт начат заново. Все количества равны нулю.';});
+  // Offer to restore a previous session only when the stored data is structurally valid.
+  try{const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'null');if(saved&&saved.rows&&saved.headers&&saved.articleIndex>=0&&saved.availableIndex>=0){if(confirm('Найден сохранённый пересчёт на этом устройстве. Продолжить его?')){headers=saved.headers;rows=saved.rows;articleIndex=saved.articleIndex;availableIndex=saved.availableIndex;fileBase=saved.fileBase||'ozon_inventory';counts=new Map(saved.counts||[]);countedSet=new Set(saved.counted||[]);recent=saved.recent||[];articleMap=new Map(rows.map((r,i)=>[norm(r[articleIndex]),i]));$('uploadSection').classList.add('hidden');$('app').classList.remove('hidden');setStatus('Восстановлен сеанс');updateStats();}}}catch(e){}
+  window.addEventListener('beforeunload',()=>{if(stream)stopCamera();});
 })();
-</script></body></html>
+</script>
+</body>
+</html>
