@@ -34,8 +34,7 @@ def utc_now() -> str:
 
 
 def project_state(project: Any, printer: Any) -> str:
-    """Track only active printing and successful completion."""
-
+    """Track active printing and confirmed successful completion only."""
     available = bool(getattr(printer, "is_available", False))
 
     if project is None:
@@ -48,16 +47,15 @@ def project_state(project: Any, printer: Any) -> str:
     complete = bool(getattr(project, "print_complete", False))
     paused = bool(getattr(project, "print_is_paused", False))
     in_progress = bool(getattr(project, "print_in_progress", False))
-
     label = str(getattr(project, "print_status", "") or "").lower()
 
-    # Отмена и ошибка не являются успешным завершением.
-    if failed or label in {
-        "cancelled", "canceled", "failed", "error", "aborted"
-    }:
+    # Canceled/failed jobs are not production results and must not be
+    # reported as a printer failure. If Cloud says the printer is available,
+    # treat it as idle; otherwise keep it unknown.
+    if failed or label in {"cancelled", "canceled", "failed", "error", "aborted"}:
         return "idle" if available else "unknown"
 
-    # Засчитываем только подтверждённое успешное завершение на 100%.
+    # Count completion only when Cloud confirms success AND progress is 100%.
     if progress >= 100 and (
         complete or label in {"complete", "completed", "finished", "done"}
     ):
@@ -107,9 +105,8 @@ async def collect_and_send(api: Any, session: aiohttp.ClientSession, worker_url:
             LOG.warning("Принтер не сопоставлен: %s (machine_type=%s, cloud_id=%s). Событие не отправлено.", name, machine_type, getattr(printer, "id", "?"))
             continue
 
-        # One latest project lookup per printer. The cloud client supplies
-        # progress, filename and terminal state; we do not infer a finish
-        # merely because progress happens to equal 100.
+        # One latest project lookup per printer. Only a confirmed successful
+        # completion at 100% is accepted as a finished production task.
         project = await api.get_latest_project(printer_id=printer.id)
         state = project_state(project, printer)
         progress = int(getattr(project, "progress_percentage", 0) or 0) if project else 0
