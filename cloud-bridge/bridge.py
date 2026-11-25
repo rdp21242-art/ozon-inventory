@@ -34,30 +34,42 @@ def utc_now() -> str:
 
 
 def project_state(project: Any, printer: Any) -> str:
-    """Translate library project state without inferring completion from 100% alone."""
-    if project is None:
-        return "idle" if getattr(printer, "is_available", False) else "unknown"
+    """Track only active printing and successful completion."""
 
-    if bool(getattr(project, "print_complete", False)):
-        return "completed"
-    if bool(getattr(project, "print_failed", False)):
-        return "failed"
-    if bool(getattr(project, "print_is_paused", False)):
-        return "paused"
-    if bool(getattr(project, "print_in_progress", False)):
-        return "printing"
+    available = bool(getattr(printer, "is_available", False))
+
+    if project is None:
+        return "idle" if available else "unknown"
+
+    progress = int(getattr(project, "progress_percentage", 0) or 0)
+    progress = max(0, min(100, progress))
+
+    failed = bool(getattr(project, "print_failed", False))
+    complete = bool(getattr(project, "print_complete", False))
+    paused = bool(getattr(project, "print_is_paused", False))
+    in_progress = bool(getattr(project, "print_in_progress", False))
 
     label = str(getattr(project, "print_status", "") or "").lower()
-    if label in {"complete", "completed", "finished", "done"}:
+
+    # Отмена и ошибка не являются успешным завершением.
+    if failed or label in {
+        "cancelled", "canceled", "failed", "error", "aborted"
+    }:
+        return "idle" if available else "unknown"
+
+    # Засчитываем только подтверждённое успешное завершение на 100%.
+    if progress >= 100 and (
+        complete or label in {"complete", "completed", "finished", "done"}
+    ):
         return "completed"
-    if label in {"cancelled", "canceled", "failed", "error", "aborted"}:
-        return "failed"
-    if label in {"paused", "pause"}:
+
+    if paused or label in {"paused", "pause"}:
         return "paused"
 
-    # A busy printer without a clearly attributed current project is not
-    # automatically attached to a production task: avoid guessing.
-    return "unknown"
+    if in_progress:
+        return "printing"
+
+    return "idle" if available else "unknown"
 
 
 async def post_event(session: aiohttp.ClientSession, worker_url: str, bridge_token: str, payload: dict[str, Any]) -> None:
