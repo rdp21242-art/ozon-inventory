@@ -1,3 +1,4 @@
+# Updated production status logic
 """Anycubic Cloud -> Cloudflare Worker production event bridge.
 
 Read-only integration: it never sends commands to a printer.
